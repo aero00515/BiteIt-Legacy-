@@ -1,0 +1,88 @@
+package edu.utboy.biteit.ui.drawer;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+
+import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+
+import edu.utboy.biteit.R;
+import edu.utboy.biteit.models.dao.FriendDAO;
+import edu.utboy.biteit.ui.adapters.MyExpandableListItemAdapter;
+import edu.utboy.biteit.utils.ListActivity;
+
+public class FriendListActivity extends ListActivity {
+
+	private static final int INITIAL_DELAY_MILLIS = 500;
+	private MyExpandableListItemAdapter mExpandableListItemAdapter;
+	private FriendDAO friendDAO;
+	private boolean isLovedPage;
+
+	@Override
+	protected void onCreate(final Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		isLovedPage = true;
+		friendDAO = new FriendDAO(this);
+		getActionBar().setTitle(R.string.friend_list_normal);
+		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
+				this).build();
+		ImageLoader.getInstance().init(config);
+		friendDAO.open();
+		mExpandableListItemAdapter = new MyExpandableListItemAdapter(this,
+				friendDAO);
+		mExpandableListItemAdapter.setLimit(2);
+
+		AlphaInAnimationAdapter alphaInAnimationAdapter = new AlphaInAnimationAdapter(
+				mExpandableListItemAdapter);
+		alphaInAnimationAdapter.setAbsListView(getListView());
+
+		assert alphaInAnimationAdapter.getViewAnimator() != null;
+		alphaInAnimationAdapter.getViewAnimator().setInitialDelayMillis(
+				INITIAL_DELAY_MILLIS);
+
+		getListView().setAdapter(alphaInAnimationAdapter);
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		friendDAO.close();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(final Menu menu) {
+		getMenuInflater().inflate(R.menu.friend_list, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(final MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_switch:
+			MyLog.d(FriendListActivity.class,
+					"clicked! before change isLoveNow:" + isLovedPage);
+			isLovedPage = !isLovedPage;
+			// if is love page, have to go to hate page
+			// if is hat page, have to go to love page
+			item.setIcon(isLovedPage ? R.drawable.switch_hate
+					: R.drawable.switch_love);
+			getActionBar().setTitle(
+					isLovedPage ? R.string.friend_list_normal
+							: R.string.friend_list_blocked);
+			mExpandableListItemAdapter.filter(isLovedPage);
+			MyLog.d(FriendListActivity.class, "after change! isLoveNow:"
+					+ isLovedPage);
+			return true;
+			// case R.id.menu_expandable_limit:
+			// mLimited = !mLimited;
+			// item.setChecked(mLimited);
+			// mExpandableListItemAdapter.setLimit(mLimited ? 2 : 0);
+			// return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+}

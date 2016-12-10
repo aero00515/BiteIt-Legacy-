@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">BiteIt</string>
+    <string name="app_id">743666375705851</string>
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_search">Search</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_switch">Switch</string>
+    <string name="fragment_store_info_pic_description">Store Pictures</string>
+    <string name="fragment_friends_info_profile_pic_description">Friend Pictures</string>
+    <string name="fragment_friends_info_name_description">name</string>
+    <string name="fragment_friends_info_comment_description">comment</string>
+    <string name="activity_store_info_total_rating">4.9</string>
+    <string name="activity_store_info_rating">The rating of this store</string>
+    <string name="activity_store_info_clean">Clean</string>
+    <string name="activity_store_info_service">Service</string>
+    <string name="activity_store_info_atmos">Atmos</string>
+    <string name="activity_store_info_favor">Favor</string>
+    <string name="activity_store_info_unknow">Unknow</string>
+    <string name="activity_store_info_feedback_close_description">close</string>
+    <string name="activity_store_info_feedback_apply_description">apply</string>
+    <string name="activity_store_info_feedback_photo_description">photo</string>
+    <string name="activity_store_info_feedback_comment_description">comment</string>
+    <string name="title_activity_plus_client">PlusClientActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="row_number">This is row number %d</string>
+    <string name="itemdeleted">Item deleted</string>
+    <string name="taptoundo">Tap to undo</string>
+    <string name="header">Header %d</string>
+    <string name="expandorcollapsecard">This is card number %d</string>
+    <string name="explainexpand">Tap on cards to expand or collapse them</string>
+    <string name="limit">Limit to 2</string>
+
+    <!-- 1st Edition, Using Chinese -->
+    <string name="tutorial_try_title">試試看！</string>
+    <string name="tutorial_stdid_hint">學號</string>
+    <string name="tutorial_stdid_next">開始</string>
+    <string name="foundnewstore_name">店名:</string>
+    <string name="foundnewstore_address">地址:</string>
+    <string name="foundnewstore_tel">電話:</string>
+    <string name="drawer_list_event">活動</string>
+    <string name="drawer_list_friends">朋友</string>
+    <string name="drawer_list_store">店家</string>
+    <string name="drawer_list_setting">設定</string>
+    <string name="drawer_list_achivement">成就</string>
+    <string name="action_focused">好愛</string>
+    <string name="action_blocked">不要</string>
+    <string name="action_feedback">回饋</string>
+    <string name="action_take_picture">拍拍</string>
+    <string name="friend_list_normal">朋友列表</string>
+    <string name="friend_list_blocked">損友列表</string>
+
+</resources>

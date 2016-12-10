@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/frame" >
+
+    <ImageView
+        android:id="@+id/activity_store_info_feedback_close"
+        android:layout_width="@dimen/close_width_height"
+        android:layout_height="@dimen/close_width_height"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="@dimen/close_margin"
+        android:layout_marginRight="@dimen/close_margin"
+        android:layout_marginTop="@dimen/close_margin"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/activity_store_info_feedback_close_description"
+        android:src="@drawable/close" />
+
+</RelativeLayout>

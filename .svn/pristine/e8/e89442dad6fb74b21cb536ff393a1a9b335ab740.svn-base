@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheckedTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_list_group_checked_textview"
+    android:layout_width="match_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:layout_marginEnd="@dimen/activity_horizontal_padding"
+    android:layout_marginLeft="@dimen/activity_horizontal_padding"
+    android:layout_marginRight="@dimen/activity_horizontal_padding"
+    android:layout_marginStart="@dimen/activity_horizontal_padding"
+    android:contentDescription="@string/activity_store_info_feedback_photo_description"
+    android:drawableEnd="@drawable/ic_launcher"
+    android:drawableRight="@drawable/ic_launcher"
+    android:gravity="start"
+    android:paddingLeft="@dimen/activity_horizontal_padding"
+    android:paddingRight="@dimen/activity_horizontal_padding"
+    android:paddingTop="8dp"
+    android:text=""
+    android:textSize="14sp"
+    android:textStyle="bold" />
+

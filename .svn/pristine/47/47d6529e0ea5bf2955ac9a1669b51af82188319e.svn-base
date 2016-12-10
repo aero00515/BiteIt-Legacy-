@@ -1,0 +1,61 @@
+package edu.utboy.biteit;
+
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
+
+import com.nhaarman.listviewanimations.appearance.simple.AlphaInAnimationAdapter;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+
+public class FriendListActivity extends ListActivity {
+
+	private static final int INITIAL_DELAY_MILLIS = 500;
+	private MyExpandableListItemAdapter mExpandableListItemAdapter;
+
+	private boolean mLimited;
+
+	@Override
+	protected void onCreate(final Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		// FriendDAO f = new FriendDAO(this);
+		// f.open();
+		// f.save(new Friend(0, "g10216002", "Lin Andy", "",
+		// "aero00515@gmail.com", false, true));
+		// f.close();
+		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
+				this).build();
+		ImageLoader.getInstance().init(config);
+		mExpandableListItemAdapter = new MyExpandableListItemAdapter(this);
+		AlphaInAnimationAdapter alphaInAnimationAdapter = new AlphaInAnimationAdapter(
+				mExpandableListItemAdapter);
+		alphaInAnimationAdapter.setAbsListView(getListView());
+
+		assert alphaInAnimationAdapter.getViewAnimator() != null;
+		alphaInAnimationAdapter.getViewAnimator().setInitialDelayMillis(
+				INITIAL_DELAY_MILLIS);
+
+		getListView().setAdapter(alphaInAnimationAdapter);
+
+		Toast.makeText(this, R.string.explainexpand, Toast.LENGTH_LONG).show();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(final Menu menu) {
+		getMenuInflater().inflate(R.menu.menu_expandablelistitem, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(final MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.menu_expandable_limit:
+			mLimited = !mLimited;
+			item.setChecked(mLimited);
+			mExpandableListItemAdapter.setLimit(mLimited ? 2 : 0);
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+}

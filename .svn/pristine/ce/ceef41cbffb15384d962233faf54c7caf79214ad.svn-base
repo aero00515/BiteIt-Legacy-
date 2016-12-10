@@ -1,0 +1,76 @@
+package edu.utboy.biteit.ui.pages;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import edu.utboy.biteit.MainActivity;
+import edu.utboy.biteit.R;
+import edu.utboy.biteit.models.StoreInfo;
+import edu.utboy.biteit.ui.StoreInfoActivity;
+
+public class SlideshowFragment extends Fragment {
+
+	private int mNum;
+	private ImageView imageView;
+
+	public static SlideshowFragment newInstance(int num) {
+
+		SlideshowFragment fragment = new SlideshowFragment();
+
+		Bundle bundle = new Bundle();
+		bundle.putInt("num", num);
+		fragment.setArguments(bundle);
+		return fragment;
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		mNum = getArguments().getInt("num", 0);
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+
+		View view = inflater.inflate(R.layout.fragment_slideshow_image, container,
+				false);
+		imageView = (ImageView) view.findViewById(R.id.page_image);
+
+		imageView.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Log.d("SlideshowFragment", "Click Page: " + mNum);
+
+				StoreInfo fakeSI = MainActivity.testStoreInfos.get(
+						"testInfo" + mNum).getStoreInfo();
+
+				Intent intent = new Intent();
+				intent.setClass(getActivity(), StoreInfoActivity.class);
+				intent.putExtra(StoreInfoActivity.STORE_INFO_TAG, fakeSI.save());
+				intent.putExtra(StoreInfoActivity.STORE_PHOTO_COMMENT_TAG,
+						"testInfo" + mNum);
+				getActivity().startActivity(intent);
+			}
+		});
+
+		return view;
+	}
+
+	/**
+	 * set slideshow test image
+	 */
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		final int imageId = MainActivity.imageId[mNum];
+		imageView.setImageResource(imageId);
+	}
+}

@@ -1,0 +1,170 @@
+package edu.utboy.biteit.asynctasks;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+
+import java.io.File;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.content.Context;
+import android.net.Uri;
+import android.os.Bundle;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import edu.utboy.biteit.asynctasks.requestqueues.SampleRequestQueue;
+import edu.utboy.biteit.asynctasks.requests.MutlipartRequest;
+import edu.utboy.biteit.models.PhotoComment;
+import edu.utboy.biteit.utils.AuthToken;
+
+public class PhotoCommentRequest {
+
+	/**
+	 * static Singleton instance
+	 */
+	private static PhotoCommentRequest mPhotoCommentRequest;
+	private VolleyTaskManager mVolleyTaskManager;
+
+	/**
+	 * Private constructor for singleton
+	 */
+	private PhotoCommentRequest() {
+		mVolleyTaskManager = VolleyTaskManager.getInstance();
+	}
+
+	/**
+	 * Static getter method for retrieving the singleton instance
+	 */
+	public static PhotoCommentRequest getInstance() {
+		if (mPhotoCommentRequest == null) {
+			synchronized (PhotoCommentRequest.class) {
+				if (mPhotoCommentRequest == null) {
+					mPhotoCommentRequest = new PhotoCommentRequest();
+				}
+			}
+		}
+		return mPhotoCommentRequest;
+	}
+
+	public synchronized void addPhotoComments(final Context context,
+			final JSONObject requestBody,
+			final Response.Listener<JSONObject> responseListener,
+			final Response.ErrorListener errorListener) throws JSONException {
+		if (isInit()) {
+			String url = mVolleyTaskManager.getServerUrl()
+					+ mVolleyTaskManager.getApiPhotoComment();
+			MutlipartRequest photoRequest = new MutlipartRequest(url,
+					errorListener, responseListener, new File(
+							URI.create(requestBody.getString("uri"))),
+					requestBody);
+
+			SampleRequestQueue.getSampleRequestQueue(context)
+					.addToRequestQueue(photoRequest);
+		}
+	}
+
+	public synchronized void getPhotoComments(Context context, Bundle params,
+			Response.Listener<JSONObject> responseListener,
+			Response.ErrorListener errorListener) {
+		if (isInit()) {
+			String param = "";
+			if (params != null) {
+				Set<String> keys = params.keySet();
+				Iterator<String> ki = keys.iterator();
+				for (int i = 0; i < keys.size(); i++) {
+					if (ki.hasNext()) {
+						String key = ki.next();
+						if (i == 0) {
+							param += "?";
+						} else {
+							param += "&";
+						}
+						param += key + "=" + params.get(key).toString();
+					}
+				}
+			}
+
+			String url = mVolleyTaskManager.getServerUrl()
+					+ mVolleyTaskManager.getApiPhotoComment() + param;
+			JsonObjectRequest jsonRequest = new JsonObjectRequest(
+					Request.Method.GET, url, null, responseListener,
+					errorListener) {
+				@Override
+				public Map<String, String> getHeaders() throws AuthFailureError {
+					HashMap<String, String> maps = new HashMap<String, String>();
+					String token = AuthToken.getAuthToken();
+					if (!token.isEmpty()) {
+						maps.put("Authorization", "Token " + token);
+					} else {
+						VolleyLog.e("string",
+								"token null: plz check auth again!");
+					}
+					return maps;
+				}
+			};
+			SampleRequestQueue.getSampleRequestQueue(context)
+					.addToRequestQueue(jsonRequest);
+		}
+	}
+
+	public Bundle createPhotoCommentBundleParams(long storeId, long friendId) {
+		Bundle params = new Bundle();
+		params.putString("store_id", String.valueOf(storeId));
+		params.putString("friend_id", String.valueOf(friendId));
+		return params;
+	}
+
+	public Bundle createPhotoCommentBundleParamsByUserName(long friendId) {
+		Bundle params = new Bundle();
+		params.putString("friend_id", String.valueOf(friendId));
+		return params;
+	}
+
+	public Bundle createPhotoCommentBundleParamsByStoreId(long storeId) {
+		Bundle params = new Bundle();
+		params.putString("store_id", String.valueOf(storeId));
+		return params;
+	}
+
+	public JSONObject createPhotoCommentJson(long storeId, long friendId,
+			Uri uri, String comment) throws JSONException {
+		JSONObject json = new JSONObject();
+		json.put("friend_id", friendId);
+		json.put("store_id", storeId);
+		json.put("uri", uri);
+		json.put("comment", comment);
+		return json;
+	}
+
+	public JSONObject getQueryAll() {
+		return new JSONObject();
+	}
+
+	public List<PhotoComment> getPhotoCommentsUsingResponse(JSONObject response) {
+		List<PhotoComment> photoComments = new ArrayList<PhotoComment>();
+		// TODO fill photocomment objects
+		return photoComments;
+	}
+
+	private boolean isInit() {
+		if (mVolleyTaskManager.getServerUrl() == null) {
+			MyLog.e(PhotoCommentRequest.class,
+					"VolleyTaskManager needs to be init before using request!");
+			return false;
+		}
+		return true;
+	}
+
+}

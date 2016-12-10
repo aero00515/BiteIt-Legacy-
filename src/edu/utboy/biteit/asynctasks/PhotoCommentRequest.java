@@ -1,0 +1,251 @@
+package edu.utboy.biteit.asynctasks;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.MediaStore;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import edu.utboy.biteit.asynctasks.requestqueues.PhotoCommentRequestQueue;
+import edu.utboy.biteit.asynctasks.requests.MutlipartRequest;
+import edu.utboy.biteit.models.PhotoComment;
+import edu.utboy.biteit.utils.AuthToken;
+
+public class PhotoCommentRequest {
+
+	private String photoCommentNextPage = "";
+
+	/**
+	 * static Singleton instance
+	 */
+	private static PhotoCommentRequest mPhotoCommentRequest;
+	private VolleyTaskManager mVolleyTaskManager;
+
+	/**
+	 * Private constructor for singleton
+	 */
+	private PhotoCommentRequest() {
+		mVolleyTaskManager = VolleyTaskManager.getInstance();
+	}
+
+	/**
+	 * Static getter method for retrieving the singleton instance
+	 */
+	public static PhotoCommentRequest getInstance() {
+		if (mPhotoCommentRequest == null) {
+			synchronized (PhotoCommentRequest.class) {
+				if (mPhotoCommentRequest == null) {
+					mPhotoCommentRequest = new PhotoCommentRequest();
+				}
+			}
+		}
+		return mPhotoCommentRequest;
+	}
+
+	public synchronized void addPhotoComments(final Context context,
+			final JSONObject requestBody,
+			final Response.Listener<JSONObject> responseListener,
+			final Response.ErrorListener errorListener) throws JSONException {
+		if (isInit()) {
+			String url = mVolleyTaskManager.getServerUrl()
+					+ mVolleyTaskManager.getApiStorePhotoComment() + "/";
+			MutlipartRequest photoRequest = new MutlipartRequest(url,
+					errorListener, responseListener, new File(
+							getRealPathFromURI(context,
+									Uri.parse(requestBody.getString("uri")))),
+					requestBody);
+
+			PhotoCommentRequestQueue.getSampleRequestQueue(context)
+					.addToRequestQueue(photoRequest);
+		}
+	}
+
+	public synchronized void getPhotoComments(Context context, Bundle params,
+			Response.Listener<JSONObject> responseListener,
+			Response.ErrorListener errorListener) {
+		if (isInit()) {
+			String param = "";
+			if (params != null) {
+				Set<String> keys = params.keySet();
+				Iterator<String> ki = keys.iterator();
+				for (int i = 0; i < keys.size(); i++) {
+					if (ki.hasNext()) {
+						String key = ki.next();
+						if (i == 0) {
+							param += "?";
+						} else {
+							param += "&";
+						}
+						param += key + "=" + params.get(key).toString();
+					}
+				}
+			}
+
+			String url = mVolleyTaskManager.getServerUrl()
+					+ mVolleyTaskManager.getApiPhotoComment() + param;
+			JsonObjectRequest jsonRequest = new JsonObjectRequest(
+					Request.Method.GET, url, null, responseListener,
+					errorListener) {
+				@Override
+				public Map<String, String> getHeaders() throws AuthFailureError {
+					HashMap<String, String> maps = new HashMap<String, String>();
+					String token = AuthToken.getAuthToken();
+					if (!token.isEmpty()) {
+						maps.put("Authorization", "Token " + token);
+					} else {
+						VolleyLog.e("string",
+								"token null: plz check auth again!");
+					}
+					return maps;
+				}
+			};
+			PhotoCommentRequestQueue.getSampleRequestQueue(context)
+					.addToRequestQueue(jsonRequest);
+		}
+	}
+
+	public Bundle createPhotoCommentBundleParams(long storeId, long friendId) {
+		Bundle params = new Bundle();
+		params.putString("store_id", String.valueOf(storeId));
+		params.putString("friend_id", String.valueOf(friendId));
+		return params;
+	}
+
+	public Bundle createPhotoCommentBundleParamsByUserName(long friendId) {
+		Bundle params = new Bundle();
+		params.putString("friend_id", String.valueOf(friendId));
+		return params;
+	}
+
+	public Bundle createPhotoCommentBundleParamsByStoreId(long storeId) {
+		Bundle params = new Bundle();
+		params.putString("store_id", String.valueOf(storeId));
+		return params;
+	}
+
+	public JSONObject createPhotoCommentJson(long storeId, long userId,
+			Uri uri, String comment) throws JSONException {
+		JSONObject json = new JSONObject();
+		json.put("user_id", userId);
+		json.put("store_id", storeId);
+		json.put("uri", uri.toString());
+		json.put("comment", comment);
+		return json;
+	}
+
+	public String getRealPathFromURI(Context context, Uri contentUri) {
+		Cursor cursor = null;
+		try {
+			String[] proj = { MediaStore.Images.Media.DATA };
+			cursor = context.getContentResolver().query(contentUri, proj, null,
+					null, null);
+			int column_index = cursor
+					.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+			cursor.moveToFirst();
+			return cursor.getString(column_index);
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
+	public List<PhotoComment> getPhotoCommentsUsingResponse(JSONObject response) {
+		List<PhotoComment> photoComments = new ArrayList<PhotoComment>();
+		// TODO fill photocomment objects
+		return photoComments;
+	}
+
+	public Bundle getNextPrevParams(String url) {
+		Bundle data = new Bundle();
+		Uri u = Uri.parse(url);
+		for (String key : u.getQueryParameterNames()) {
+			data.putString(key, u.getQueryParameter(key));
+		}
+		return data;
+	}
+
+	private boolean isInit() {
+		if (mVolleyTaskManager.getServerUrl() == null) {
+			MyLog.e(PhotoCommentRequest.class,
+					"VolleyTaskManager needs to be init before using request!");
+			return false;
+		}
+		return true;
+	}
+
+	public List<PhotoComment> getPhotoCommentRequest(JSONObject json) {
+
+		List<PhotoComment> photoComments = new ArrayList<PhotoComment>();
+
+		try {
+			setPhotoCommentNextPage((json.has("next") && !json.isNull("next")) ? json
+					.getString("next") : null);
+			JSONArray results = json.getJSONArray("results");
+
+			if (results.length() != 0) {
+				for (int i = 0; i < results.length(); i++) {
+					Bundle bundle = new Bundle();
+
+					JSONObject obj = results.getJSONObject(i);
+
+					bundle.putLong(PhotoComment.STORE_ID,
+							obj.getLong("store_id"));
+					bundle.putLong(PhotoComment.USER_ID, obj.getLong("user_id"));
+					bundle.putString(PhotoComment.URI, obj.getString("photo"));
+					bundle.putString(PhotoComment.COMMENT, URLDecoder.decode(
+							obj.getString("comment"), "UTF-8"));
+					PhotoComment photoComment = new PhotoComment(bundle);
+					photoComments.add(photoComment);
+				}
+			} else {
+				Bundle bundle = new Bundle();
+				bundle.putLong(PhotoComment.STORE_ID, 0);
+				bundle.putLong(PhotoComment.USER_ID, 0);
+				bundle.putString(PhotoComment.URI, "");
+				bundle.putString(PhotoComment.COMMENT, "");
+
+				PhotoComment photoComment = new PhotoComment(bundle);
+				photoComments.add(photoComment);
+			}
+
+		} catch (JSONException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+
+		return photoComments;
+	}
+
+	public String getPhotoCommentNextPage() {
+		return photoCommentNextPage;
+	}
+
+	public void setPhotoCommentNextPage(String photoCommentNextPage) {
+		this.photoCommentNextPage = photoCommentNextPage;
+	}
+
+}

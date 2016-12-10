@@ -1,0 +1,27 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="edu.utboy.biteit.ui.StoreInfoActivity" >
+
+    <item
+        android:id="@+id/action_take_picture"
+        android:icon="@drawable/take_pictue"
+        android:title="@string/action_take_picture"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_feedback"
+        android:icon="@drawable/comment_new1"
+        android:title="@string/action_feedback"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_focused"
+        android:icon="@drawable/love"
+        android:title="@string/action_focused"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_blocked"
+        android:icon="@drawable/bomb"
+        android:title="@string/action_blocked"
+        app:showAsAction="ifRoom"/>
+
+</menu>

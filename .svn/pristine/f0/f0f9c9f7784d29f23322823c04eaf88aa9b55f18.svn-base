@@ -1,0 +1,281 @@
+package edu.utboy.biteit.ui.tutorials;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+
+import java.util.Arrays;
+
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.IntentSender.SendIntentException;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.Toast;
+
+import com.facebook.FacebookRequestError;
+import com.facebook.HttpMethod;
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.model.GraphObject;
+import com.facebook.widget.LoginButton;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.plus.Plus;
+import com.google.android.gms.plus.model.people.Person;
+import com.google.gson.Gson;
+
+import edu.utboy.biteit.R;
+
+public class MultiLoginFragment extends Fragment implements
+		ConnectionCallbacks, OnConnectionFailedListener {
+
+	private static final int RC_SIGN_IN = 0;
+
+	private boolean mIntentInProgress;
+	private boolean mSignInClicked;
+
+	private OnLoginCallback mOnLoginCallback;
+	private GoogleApiClient mGoogleApiClient;
+	private ProgressDialog connectionProgressDialog;
+	private ConnectionResult mConnectionResult;
+	private SignInButton googleSignInBtn;
+
+	public MultiLoginFragment(OnLoginCallback mOnLoginCallback) {
+		this.mOnLoginCallback = mOnLoginCallback;
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+
+		initGoogleApiClient();
+
+		View rootView = inflater.inflate(R.layout.fragment_multi_login,
+				container, false);
+		LoginButton authButton = (LoginButton) rootView
+				.findViewById(R.id.authButton);
+		googleSignInBtn = (SignInButton) rootView
+				.findViewById(R.id.sign_in_button);
+
+		authButton.setFragment(this);
+		authButton.setReadPermissions(Arrays.asList("user_friends", "email",
+				"user_about_me", "user_location", "user_tagged_places",
+				"read_friendlists"));
+
+		googleSignInBtn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if (!mGoogleApiClient.isConnecting()) {
+					mSignInClicked = true;
+					resolveSignInError();
+				}
+			}
+		});
+		return rootView;
+	}
+
+	private void initGoogleApiClient() {
+		mGoogleApiClient = new GoogleApiClient.Builder(getActivity())
+				.addConnectionCallbacks(this)
+				.addOnConnectionFailedListener(this).addApi(Plus.API)
+				.addScope(Plus.SCOPE_PLUS_LOGIN).build();
+
+		connectionProgressDialog = new ProgressDialog(getActivity());
+		connectionProgressDialog.setMessage("Signing in...");
+	}
+
+	/* A helper method to resolve the current ConnectionResult error. */
+	private void resolveSignInError() {
+		if (mConnectionResult.hasResolution()) {
+			connectionProgressDialog.show();
+			try {
+				mIntentInProgress = true;
+				// getActivity().startIntentSenderForResult(
+				// mConnectionResult.getResolution().getIntentSender(),
+				// RC_SIGN_IN, null, 0, 0, 0);
+				mConnectionResult.startResolutionForResult(getActivity(),
+						RC_SIGN_IN);
+			} catch (SendIntentException e) {
+				// The intent was canceled before it was sent. Return to the
+				// default state and attempt to connect to get an updated
+				// ConnectionResult.
+				mIntentInProgress = false;
+				mGoogleApiClient.connect();
+			}
+		}
+	}
+
+	private void getGoogleUserProfile() {
+		if (Plus.PeopleApi.getCurrentPerson(mGoogleApiClient) != null) {
+			Person curPerson = Plus.PeopleApi
+					.getCurrentPerson(mGoogleApiClient);
+			String personId = curPerson.getId();
+			String personName = curPerson.getDisplayName();
+			String personEmail = Plus.AccountApi
+					.getAccountName(mGoogleApiClient);
+			String personPhotoUrl = curPerson.getImage().getUrl();
+
+			MyLog.d(MultiLoginFragment.class, "ID: " + personId + ", Name: "
+					+ personName + ", Email: " + personEmail + ", PhotoUrl: "
+					+ personPhotoUrl);
+
+			Bundle data = new Bundle();
+			data.putString(OnLoginCallback.GOOGLE_USER_ID, personId);
+			data.putString(OnLoginCallback.GOOGLE_NAME, personName);
+			data.putString(OnLoginCallback.GOOGLE_EMAIL, personEmail);
+			data.putString(OnLoginCallback.GOOGLE_USER_PHOTO, personPhotoUrl);
+
+			mOnLoginCallback.onLogin(data);
+		}
+	}
+
+	private void signOutFromGoogle() {
+		if (mGoogleApiClient.isConnected()) {
+			Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+			mGoogleApiClient.disconnect();
+			mGoogleApiClient.connect();
+			Toast.makeText(getActivity(), "User is sign out!",
+					Toast.LENGTH_LONG).show();
+		}
+	}
+
+	private void revokeGplusAccess() {
+		if (mGoogleApiClient.isConnected()) {
+			Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+			Plus.AccountApi.revokeAccessAndDisconnect(mGoogleApiClient)
+					.setResultCallback(new ResultCallback<Status>() {
+						@Override
+						public void onResult(Status arg0) {
+							Log.e("MultiLoginFragment", "User access revoked!");
+							mGoogleApiClient.connect();
+						}
+					});
+		}
+	}
+
+	private void doGetUserRequest(Session fbAuthToken) {
+		Request request = new Request(fbAuthToken, "/me", null, HttpMethod.GET,
+				new Request.Callback() {
+
+					@Override
+					public void onCompleted(Response response) {
+						GraphObject go = response.getGraphObject();
+						FacebookRequestError fre = response.getError();
+						if (go != null) {
+							String id = go.asMap().get("id").toString();
+							String email = go.asMap().get("email").toString();
+							String name = go.asMap().get("name").toString();
+
+							Bundle data = new Bundle();
+							data.putString(OnLoginCallback.FB_USER_ID, id);
+							data.putString(OnLoginCallback.FB_NAME, name);
+							data.putString(OnLoginCallback.FB_EMAIL, email);
+							data.putString(OnLoginCallback.TEST_GRAPH_USER,
+									new Gson().toJson(go.asMap()));
+							mOnLoginCallback.onLogin(data);
+						} else if (fre != null) {
+							MyLog.e(MultiLoginFragment.class,
+									fre.getErrorMessage());
+						}
+					}
+				});
+		Request.executeBatchAsync(request);
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (Session.getActiveSession().onActivityResult(getActivity(),
+				requestCode, resultCode, data)) {
+			// is Facebook auth
+			if (Session.getActiveSession().isOpened()) {
+				doGetUserRequest(Session.getActiveSession());
+			}
+		} else {
+			if (requestCode == RC_SIGN_IN) {
+				getActivity();
+				if (resultCode != FragmentActivity.RESULT_OK) {
+					mSignInClicked = false;
+				}
+
+				mIntentInProgress = false;
+
+				if (!mGoogleApiClient.isConnecting()) {
+					mGoogleApiClient.connect();
+				}
+
+				getGoogleUserProfile();
+			}
+		}
+	}
+
+	public interface OnLoginCallback {
+		public static final String FB_USER_ID = "fb_user_id";
+		public static final String FB_NAME = "fb_name";
+		public static final String FB_EMAIL = "fb_email";
+		public static final String TEST_GRAPH_USER = "test_graph_user";
+
+		public static final String GOOGLE_USER_ID = "google_user_id";
+		public static final String GOOGLE_NAME = "google_name";
+		public static final String GOOGLE_EMAIL = "google_email";
+		public static final String GOOGLE_USER_PHOTO = "google_user_photo";
+
+		public void onLogin(Bundle data);
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		mGoogleApiClient.connect();
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+
+		if (mGoogleApiClient.isConnected()) {
+			mGoogleApiClient.disconnect();
+		}
+	}
+
+	@Override
+	public void onConnectionFailed(ConnectionResult result) {
+		if (!mIntentInProgress) {
+			// Store the ConnectionResult so that we can use it later when the
+			// user clicks 'sign-in'.
+			mConnectionResult = result;
+
+			if (mSignInClicked) {
+				// The user has already clicked 'sign-in' so we attempt to
+				// resolve all errors until the user is signed in, or they
+				// cancel.
+				resolveSignInError();
+			}
+		}
+	}
+
+	@Override
+	public void onConnected(Bundle arg0) {
+		mSignInClicked = false;
+		connectionProgressDialog.dismiss();
+		Toast.makeText(getActivity(), "User is connected!", Toast.LENGTH_LONG)
+				.show();
+	}
+
+	@Override
+	public void onConnectionSuspended(int arg0) {
+		mGoogleApiClient.connect();
+	}
+}

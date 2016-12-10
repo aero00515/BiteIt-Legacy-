@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_store_info_scroll_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+         >
+
+        <ImageButton
+            android:id="@+id/activity_store_info_pic_null"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/activity_store_info_pic_pager_layout"
+            android:layout_alignEnd="@+id/activity_store_info_pic_pager_layout"
+            android:layout_alignLeft="@+id/activity_store_info_pic_pager_layout"
+            android:layout_alignRight="@+id/activity_store_info_pic_pager_layout"
+            android:layout_alignStart="@+id/activity_store_info_pic_pager_layout"
+            android:layout_alignTop="@+id/activity_store_info_pic_pager_layout"
+            android:contentDescription="@string/abc_action_menu_overflow_description"
+            android:src="@drawable/take_pictue" />
+
+        <LinearLayout
+            android:id="@+id/activity_store_info_pic_pager_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/store_info_pic_min_height" >
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/activity_store_info_pic_pager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+            </android.support.v4.view.ViewPager>
+        </LinearLayout>
+
+        <com.viewpagerindicator.CirclePageIndicator
+            android:id="@+id/indicator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/activity_store_info_pic_pager_layout"
+            android:layout_centerHorizontal="true"
+            android:background="#aaffffff"
+            android:padding="@dimen/activity_vertical_padding" />
+
+        <LinearLayout
+            android:id="@+id/activity_store_info_rating_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/activity_store_info_pic_pager_layout"
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:layout_marginEnd="@dimen/activity_horizontal_padding"
+            android:layout_marginRight="@dimen/activity_horizontal_padding" >
+
+            <TextView
+                android:id="@+id/activity_store_info_total_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="@dimen/activity_horizontal_padding"
+                android:layout_marginRight="@dimen/activity_horizontal_padding"
+                android:background="@drawable/abc_menu_dropdown_panel_holo_light"
+                android:gravity="center"
+                android:maxLines="1"
+                android:padding="@dimen/activity_horizontal_margin"
+                android:text="@string/activity_store_info_total_rating"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textStyle="bold" />
+
+            <TableLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:background="@drawable/abc_menu_dropdown_panel_holo_light"
+                android:padding="@dimen/activity_vertical_margin" >
+
+                <TableRow
+                    android:id="@+id/tableRow1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/activity_store_info_clean"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="@string/activity_store_info_clean"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                    <RatingBar
+                        android:id="@+id/activity_store_info_clean_rating"
+                        style="@style/customRatingBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="49"
+                        android:isIndicator="true"
+                        android:max="5"
+                        android:rating="3.7"
+                        android:stepSize="0.1" />
+
+                    <!--
+                    <ImageView
+                        android:id="@+id/activity_store_info_clean_rating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="49"
+                        android:contentDescription="@string/activity_store_info_rating"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/rating_4" />
+                    -->
+
+                    <TextView
+                        android:id="@+id/activity_store_info_flavor"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="@string/activity_store_info_favor"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                    <RatingBar
+                        android:id="@+id/activity_store_info_flavor_rating"
+                        style="@style/customRatingBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="49"
+                        android:isIndicator="true"
+                        android:max="5"
+                        android:rating="4.7"
+                        android:stepSize="0.1" />
+                    <!--
+                    <ImageView
+                        android:id="@+id/imageView2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="49"
+                        android:contentDescription="@string/activity_store_info_rating"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/rating_4" />
+                    -->
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/activity_store_info_service"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="@string/activity_store_info_service"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                    <RatingBar
+                        android:id="@+id/activity_store_info_service_rating"
+                        style="@style/customRatingBar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="49"
+                        android:isIndicator="true"
+                        android:max="5"
+                        android:rating="3"
+                        android:stepSize="0.1" />
+                    
+                    <!--
+                    <ImageView
+                        android:id="@+id/activity_store_info_feedback_close"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="49"
+                        android:contentDescription="@string/activity_store_info_rating"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/rating_5" />
+                    -->
+
+                    <TextView
+                        android:id="@+id/activity_store_info_unknow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="@string/activity_store_info_unknow"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                    <RatingBar
+                        android:id="@+id/activity_store_info_unknow_rating"
+                        style="@style/customRatingBar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="49"
+                        android:isIndicator="true"
+                        android:max="5"
+                        android:rating="4.1"
+                        android:stepSize="0.1" />
+                    <!--
+                    <ImageView
+                        android:id="@+id/imageView3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="49"
+                        android:contentDescription="@string/activity_store_info_rating"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/rating_3" />
+                    -->
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/activity_store_info_atmos"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="@string/activity_store_info_atmos"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                    <RatingBar
+                        android:id="@+id/activity_store_info_atmos_rating"
+                        style="@style/customRatingBar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="49"
+                        android:isIndicator="true"
+                        android:max="5"
+                        android:rating="2.7"
+                        android:stepSize="0.1" />
+                    <!--
+                    <ImageView
+                        android:id="@+id/imageView4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="49"
+                        android:contentDescription="@string/activity_store_info_rating"
+                        android:src="@drawable/rating_4" />
+                    -->
+
+                    <TextView
+                        android:id="@+id/activity_store_info_empty_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                    <TextView
+                        android:id="@+id/activity_store_info_empty_text2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="49"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                </TableRow>
+            </TableLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/activity_store_info_rating_layout"
+			android:gravity="center_horizontal"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/activity_store_info_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text=""
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+            <TextView
+                android:id="@+id/activity_store_info_phone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text=""
+                android:textAppearance="?android:attr/textAppearanceMedium" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</ScrollView>

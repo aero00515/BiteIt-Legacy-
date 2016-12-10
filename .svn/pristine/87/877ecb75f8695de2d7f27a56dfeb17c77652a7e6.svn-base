@@ -1,0 +1,143 @@
+package edu.utboy.biteit.ui.adapters;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.app.Activity;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
+
+import edu.utboy.biteit.R;
+import edu.utboy.biteit.asynctasks.VolleyTaskManager;
+import edu.utboy.biteit.models.PhotoComment;
+import edu.utboy.biteit.models.StoreInfo;
+
+public class StoreListAdapter extends BaseAdapter {
+
+	private Activity activity;
+	private List<StoreLists> storeInfos;
+	private List<StoreLists> curStoreInfos;
+	private DisplayImageOptions options;
+	private int counter;
+
+	public StoreListAdapter(Activity activity, List<StoreLists> storeInfos) {
+		curStoreInfos = new ArrayList<StoreLists>();
+		this.activity = activity;
+		this.storeInfos = storeInfos;
+		options = new DisplayImageOptions.Builder().cacheOnDisk(true)
+				.displayer(new FadeInBitmapDisplayer(700)).build();
+		// curStoreInfos.addAll(storeInfos);
+		filter(true);
+
+	}
+
+	@Override
+	public int getCount() {
+		return curStoreInfos.size();
+	}
+
+	@Override
+	public Object getItem(int position) {
+		return curStoreInfos.get(position);
+	}
+
+	@Override
+	public long getItemId(int position) {
+		return curStoreInfos.get(position).getStoreInfo().getStoreId();
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		if (convertView == null) {
+			convertView = activity.getLayoutInflater().inflate(
+					R.layout.store_list_style, parent, false);
+		}
+		StoreLists storeList = curStoreInfos.get(position);
+		TextView storeListTextView = (TextView) convertView
+				.findViewById(R.id.store_list_style_store_name);
+		ImageView storeListBG = (ImageView) convertView
+				.findViewById(R.id.store_list_store_background);
+		storeListTextView.setText(storeList.getStoreInfo().getName());
+		if (storeList.getPhotoComments().size() > 0) {
+			if (storeList.getPhotoComments().size() == 1) {
+				PhotoComment photoComment = storeList.getPhotoComments().get(0);
+				ImageLoader
+						.getInstance()
+						.displayImage(
+								(VolleyTaskManager.getInstance().getMediaRoot() + photoComment
+										.getUri()), storeListBG, options);
+			} else {
+				PhotoComment photoComment = storeList.getPhotoComments().get(
+						(counter % storeList.getPhotoComments().size()));
+				ImageLoader
+						.getInstance()
+						.displayImage(
+								(VolleyTaskManager.getInstance().getMediaRoot() + photoComment
+										.getUri()), storeListBG, options);
+			}
+		} else {
+			// TODO show no pic view
+		}
+
+		if (storeList.getStoreInfo().isBlocked()) {
+			// TODO add blocked view
+		} else {
+			// TODO remove blocked view
+		}
+		return convertView;
+	}
+
+	public void filter(boolean isLovedPage) {
+		curStoreInfos.clear();
+		for (StoreLists storeLists : storeInfos) {
+			if (isLovedPage) {
+				if (storeLists.getStoreInfo().isFavor()) {
+					curStoreInfos.add(storeLists);
+				}
+			} else {
+				if (storeLists.getStoreInfo().isBlocked()) {
+					curStoreInfos.add(storeLists);
+				}
+			}
+		}
+		notifyDataSetChanged();
+	}
+
+	public void setPicPos(int count) {
+		this.counter = count;
+	}
+
+	public class StoreLists {
+		private StoreInfo storeInfo;
+		private List<PhotoComment> photoComments;
+
+		public StoreLists(StoreInfo storeInfo, List<PhotoComment> photoComments) {
+			this.storeInfo = storeInfo;
+			this.photoComments = photoComments;
+		}
+
+		public StoreInfo getStoreInfo() {
+			return storeInfo;
+		}
+
+		public void setStoreInfo(StoreInfo storeInfo) {
+			this.storeInfo = storeInfo;
+		}
+
+		public List<PhotoComment> getPhotoComments() {
+			return photoComments;
+		}
+
+		public void setPhotoComments(List<PhotoComment> photoComments) {
+			this.photoComments = photoComments;
+		}
+	}
+
+}

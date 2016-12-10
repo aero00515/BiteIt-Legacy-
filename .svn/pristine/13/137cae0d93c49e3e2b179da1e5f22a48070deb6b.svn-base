@@ -1,0 +1,48 @@
+package edu.utboy.biteit.ui.pages;
+
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+
+import edu.utboy.biteit.R;
+
+public class StoreInfoPicFragment extends Fragment {
+
+	public final static String STORE_INFO_PIC_TAG = "store_info_pic_tag";
+	public final static String STORE_INFO_PIC_URI = "store_info_pic_uri";
+	public final static String STORE_INFO_PIC_COMMENT = "store_info_pic_comment";
+	private DisplayImageOptions mDisplayImageOptions;
+	private View storeInfoPicView;
+	private String uri;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		Bundle arg = getArguments();
+		mDisplayImageOptions = new DisplayImageOptions.Builder()
+				.showImageForEmptyUri(R.drawable.ic_launcher)
+				.showImageOnFail(R.drawable.ic_launcher)
+				.showImageOnLoading(R.drawable.ic_launcher).cacheInMemory(true)
+				.cacheOnDisk(true).build();
+		uri = arg.getString(STORE_INFO_PIC_URI);
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		storeInfoPicView = inflater.inflate(R.layout.fragment_store_info_pic,
+				container, false);
+		ImageView storeInfoPic = (ImageView) storeInfoPicView
+				.findViewById(R.id.store_info_pic);
+		ImageLoader.getInstance().displayImage(uri, storeInfoPic,
+				mDisplayImageOptions);
+		return storeInfoPicView;
+	}
+
+}

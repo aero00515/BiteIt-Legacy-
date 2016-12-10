@@ -1,0 +1,328 @@
+package edu.utboy.biteit;
+
+import idv.andylin.tw.andyandroidlibs.HandlerCallBack;
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Message;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.widget.Toast;
+
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.facebook.Session;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.viewpagerindicator.LinePageIndicator;
+
+import edu.utboy.biteit.asynctasks.NewUserRequest;
+import edu.utboy.biteit.asynctasks.VolleyTaskManager;
+import edu.utboy.biteit.ui.tutorials.MultiLoginFragment;
+import edu.utboy.biteit.ui.tutorials.MultiLoginFragment.OnLoginCallback;
+import edu.utboy.biteit.ui.tutorials.StudentIdFragment;
+import edu.utboy.biteit.ui.tutorials.TutorialFragment;
+
+public class TutorialActivity extends FragmentActivity {
+
+	/**
+	 * Substitute you own sender ID here. This is the project number you got
+	 * from the API Console, as described in "Getting Started."
+	 */
+	private final String SENDER_ID = "943580367555";
+	private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+
+	GoogleCloudMessaging gcm;
+	AtomicInteger msgId = new AtomicInteger();
+
+	private List<Fragment> fragments;
+	private MultiLoginFragment mlf;
+	private ViewPager toturialPager;
+	private ToturialPagerAdapter tpa;
+	private LinePageIndicator lpi;
+	private boolean isTutorialShown;
+	private Bundle newUserData;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_toturial);
+		mlf = new MultiLoginFragment(onLoginCallback);
+		fragments = new ArrayList<Fragment>(3);
+		fragments.add(mlf);
+		toturialPager = (ViewPager) findViewById(R.id.activity_tutorial_pager);
+		lpi = (LinePageIndicator) findViewById(R.id.toturial_indicator);
+		tpa = new ToturialPagerAdapter(getSupportFragmentManager(), fragments);
+		toturialPager.setAdapter(tpa);
+		lpi.setViewPager(toturialPager);
+
+		// Check device for Play Services APK. If check succeeds, proceed with
+		// GCM registration.
+		if (checkPlayServices()) {
+			gcm = GoogleCloudMessaging.getInstance(this);
+		} else {
+			MyLog.i(TutorialActivity.class,
+					"No valid Google Play Services APK found.");
+		}
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		checkPlayServices();
+	}
+
+	private Fragment getToturialFragment() {
+		TutorialFragment f = new TutorialFragment();
+		return f;
+	}
+
+	private void showNextFragment() {
+		if (!isTutorialShown) {
+			fragments.add(new StudentIdFragment(onNextListener));
+			fragments.add(getToturialFragment());
+			tpa.notifyDataSetChanged();
+			lpi.notifyDataSetChanged();
+			toturialPager.setCurrentItem(1);
+			isTutorialShown = true;
+		}
+	}
+
+	private StudentIdFragment.OnNextListener onNextListener = new StudentIdFragment.OnNextListener() {
+		@Override
+		public void onNext(String stdId) {
+			if (newUserData != null) {
+				if (stdId != null && stdId.matches("[ug]?[0-9]{7,8}")) {
+					newUserData.putString("username", stdId);
+					newUserData.putString("password",
+							String.valueOf(System.currentTimeMillis()));
+					newUserData.putString("last_name", "");
+					registerInBackground(newUserData, new HandlerCallBack() {
+
+						@Override
+						public void handleDataMessage(Message msg) {
+							Intent intent = new Intent();
+							intent.setClass(TutorialActivity.this,
+									MainActivity.class);
+							startActivity(intent);
+						}
+					});
+					toturialPager.setCurrentItem(2);
+				} else {
+					Toast.makeText(TutorialActivity.this,
+							"Please check your student Id", Toast.LENGTH_SHORT)
+							.show();
+				}
+			} else {
+				Toast.makeText(TutorialActivity.this,
+						"Plaese check your login again!", Toast.LENGTH_SHORT)
+						.show();
+				toturialPager.setCurrentItem(0);
+			}
+		}
+	};
+
+	private OnLoginCallback onLoginCallback = new OnLoginCallback() {
+
+		@Override
+		public void onLogin(Bundle data) {
+
+			String loginType = data.getString(OnLoginCallback.LOGIN_TYPE);
+			if (loginType.equals("facebook")) {
+				if (Session.getActiveSession().isOpened()) {
+					String userId = data.getString(OnLoginCallback.FB_USER_ID);
+					if (userId != null && !userId.isEmpty()) {
+						newUserData = new Bundle();
+						newUserData.putString("first_name",
+								data.getString(OnLoginCallback.FB_NAME));
+						newUserData.putString("email",
+								data.getString(OnLoginCallback.FB_EMAIL));
+						newUserData.putString("third_id", userId);
+						newUserData.putString("login_type", loginType);
+						showNextFragment();
+						MyLog.i(TutorialActivity.class,
+								data.getString(OnLoginCallback.TEST_GRAPH_USER));
+					}
+				} else {
+					MyLog.e(TutorialActivity.class, "Fb Session closed");
+				}
+			} else if (loginType.equals("google")) {
+				String userId = data.getString(OnLoginCallback.GOOGLE_USER_ID);
+				if (userId != null && !userId.isEmpty()) {
+					newUserData = new Bundle();
+					newUserData.putString("first_name",
+							data.getString(OnLoginCallback.FB_NAME));
+					newUserData.putString("email",
+							data.getString(OnLoginCallback.FB_EMAIL));
+					newUserData.putString("third_id", userId);
+					newUserData.putString("login_type", loginType);
+					showNextFragment();
+					MyLog.i(TutorialActivity.class,
+							data.getString(OnLoginCallback.TEST_GRAPH_USER));
+				}
+			}
+		}
+	};
+
+	/**
+	 * Registers the application with GCM servers asynchronously.
+	 * <p>
+	 * Stores the registration ID and app versionCode in the application's
+	 * shared preferences.
+	 */
+	private void registerInBackground(final Bundle data,
+			final HandlerCallBack handlerCallback) {
+		new Thread() {
+			@Override
+			public void run() {
+				String msg = "";
+				try {
+					if (gcm == null) {
+						gcm = GoogleCloudMessaging
+								.getInstance(TutorialActivity.this);
+					}
+					String regid = gcm.register(SENDER_ID);
+					msg = "Device registered, registration ID=" + regid;
+
+					// TODO send data to new user
+					// You should send the registration ID to your server over
+					// HTTP, so it can use GCM/HTTP or CCS to send messages to
+					// your app.
+					// The request to your server should be authenticated
+					// if your app is using accounts.
+					data.putString("gcm_id", regid);
+					sendRegistrationIdToBackend(data.getString("username"),
+							data.getString("password"),
+							data.getString("first_name"),
+							data.getString("last_name"),
+							data.getString("email"),
+							data.getString("login_type"),
+							data.getString("third_id"),
+							data.getString("gcm_id"));
+
+					// For this demo: we don't need to send it because the
+					// device will send upstream messages to a server that echo
+					// back the message using the 'from' address in the message.
+
+					// TODO Save regID into sharedPreference
+					// Persist the regID - no need to register again.
+					// storeRegistrationId(TutorialActivity.this, regid);
+				} catch (IOException ex) {
+					msg = "Error :" + ex.getMessage();
+					// If there is an error, don't just keep trying to register.
+					// Require the user to click a button again, or perform
+					// exponential back-off.
+					ex.printStackTrace();
+				}
+				MyLog.d(TutorialActivity.class, msg);
+				Message message = new Message();
+				handlerCallback.handleDataMessage(message);
+			}
+		}.start();
+	}
+
+	/**
+	 * Sends the registration ID to your server over HTTP, so it can use
+	 * GCM/HTTP or CCS to send messages to your app. Not needed for this demo
+	 * since the device sends upstream messages to a server that echoes back the
+	 * message using the 'from' address in the message.
+	 */
+	private void sendRegistrationIdToBackend(String userName, String password,
+			String firstName, String lastName, String email, String loginType,
+			String thirdId, String gcmId) {
+		VolleyTaskManager.getInstance().init(getAssets());
+		try {
+			final JSONObject user = NewUserRequest.getInstance()
+					.getNewUserRequestBody(userName, password, firstName,
+							lastName, email);
+			final JSONObject userDetail = NewUserRequest.getInstance()
+					.createUserDetailJsonObject(loginType, thirdId, gcmId);
+
+			NewUserRequest.getInstance().newUser(getApplicationContext(), user,
+					userDetail, new Response.Listener<JSONObject>() {
+
+						@Override
+						public void onResponse(JSONObject response) {
+							VolleyLog.d("json " + response.toString());
+							Bundle data = new Bundle();
+							try {
+								data = NewUserRequest.getInstance()
+										.getUserTokenData(response, userDetail,
+												user.getString("password"));
+							} catch (JSONException e) {
+								e.printStackTrace();
+							}
+							Intent intent = new Intent();
+							intent.setAction(SyncUserDataService.SAVE_DATA);
+							intent.putExtra(SyncUserDataService.SYNC_DATA, data);
+							startService(intent);
+						}
+					}, new Response.ErrorListener() {
+
+						@Override
+						public void onErrorResponse(VolleyError error) {
+							VolleyLog.e("json " + error.getLocalizedMessage());
+						}
+					});
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Check the device to make sure it has the Google Play Services APK. If it
+	 * doesn't, display a dialog that allows users to download the APK from the
+	 * Google Play Store or enable it in the device's system settings.
+	 */
+	private boolean checkPlayServices() {
+		int resultCode = GooglePlayServicesUtil
+				.isGooglePlayServicesAvailable(this);
+		if (resultCode != ConnectionResult.SUCCESS) {
+			if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+				GooglePlayServicesUtil.getErrorDialog(resultCode, this,
+						PLAY_SERVICES_RESOLUTION_REQUEST).show();
+			} else {
+				MyLog.i(TutorialActivity.class, "This device is not supported.");
+				finish();
+			}
+			return false;
+		}
+		return true;
+	}
+
+	private class ToturialPagerAdapter extends FragmentStatePagerAdapter {
+
+		private List<Fragment> fragments;
+
+		public ToturialPagerAdapter(FragmentManager fm, List<Fragment> f) {
+			super(fm);
+			fragments = f;
+		}
+
+		@Override
+		public int getCount() {
+			return fragments.size();
+		}
+
+		@Override
+		public Fragment getItem(int position) {
+			return fragments.get(position);
+		}
+
+	}
+
+}

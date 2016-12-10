@@ -1,0 +1,68 @@
+package edu.utboy.biteit;
+
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.util.Base64;
+import edu.utboy.biteit.utils.AuthToken;
+
+public class SyncUserDataService extends Service {
+
+	public static final String SYNC_ACTION = "SyncUserDataService";
+	public static final String SAVE_DATA = "save_data";
+	public static final String SYNC_DATA = "sync_data";
+	public static final String SHARED_PREFERENCED_DB_NAME = "bite.it.sp";
+	public static final String SHARED_PREFERENCED_BASE = "sp_base";
+	public static final String SHARED_PREFERENCED_TOKEN = "sp_token";
+
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		if (intent.getAction().equals(SAVE_DATA)) {
+			Bundle data = intent.getBundleExtra(SYNC_DATA);
+			save(data.getString(SHARED_PREFERENCED_BASE),
+					data.getString(SHARED_PREFERENCED_TOKEN));
+		} else if (intent.getAction().equals(SYNC_DATA)) {
+			syncUserPreference();
+		}
+
+		return super.onStartCommand(intent, flags, startId);
+	}
+
+	@Override
+	public IBinder onBind(Intent intent) {
+		return null;
+	}
+
+	private void save(String userpass, String token) {
+		SharedPreferences.Editor spe = getSharedPreferences(
+				SyncUserDataService.SHARED_PREFERENCED_DB_NAME, MODE_PRIVATE)
+				.edit();
+		spe.putString(SyncUserDataService.SHARED_PREFERENCED_BASE,
+				Base64.encodeToString(userpass.getBytes(), Base64.DEFAULT));
+		spe.putString(SHARED_PREFERENCED_TOKEN, token);
+		AuthToken.saveToken(token);
+		spe.commit();
+	}
+
+	private void syncUserPreference() {
+		Intent intent = new Intent();
+		intent.setAction(SYNC_ACTION);
+		Bundle data = new Bundle();
+		SharedPreferences sharedPreferenced = getSharedPreferences(
+				SHARED_PREFERENCED_DB_NAME, Context.MODE_PRIVATE);
+		data.putString(SHARED_PREFERENCED_BASE,
+				sharedPreferenced.getString(SHARED_PREFERENCED_BASE, ""));
+		data.putString(SHARED_PREFERENCED_TOKEN,
+				sharedPreferenced.getString(SHARED_PREFERENCED_TOKEN, ""));
+		intent.putExtra(SYNC_DATA, data);
+		sendBroadcast(intent);
+	}
+
+	public interface OnFinishListener {
+		public void onFinish(Bundle data);
+	}
+
+}

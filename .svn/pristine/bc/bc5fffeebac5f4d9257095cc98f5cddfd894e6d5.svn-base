@@ -1,0 +1,258 @@
+package edu.utboy.biteit.models.dao;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import edu.utboy.biteit.db.DataBaseHelper;
+import edu.utboy.biteit.models.StoreInfo;
+
+public class StoreInfoDAO extends BaseDAO<StoreInfo> {
+
+	public StoreInfoDAO(Context ctx) {
+		super(ctx);
+	}
+
+	/**
+	 * @return the row ID of the newly inserted row, or -1 if an error occurred
+	 */
+	@Override
+	public synchronized long save(StoreInfo storeInfo) {
+		String tags = "";
+		for (String tag : storeInfo.getTags()) {
+			tags += tag + ",";
+		}
+		tags.substring(0, tags.lastIndexOf(","));
+
+		ContentValues values = new ContentValues();
+		values.put(DataBaseHelper.STORE_ID, storeInfo.getStoreId());
+		values.put(DataBaseHelper.GOOGLE_STORE_ID, storeInfo.getGoogleStoreId());
+		values.put(DataBaseHelper.NAME, storeInfo.getName());
+		values.put(DataBaseHelper.ADDRESS, storeInfo.getAddress());
+		values.put(DataBaseHelper.PHONE, storeInfo.getPhone());
+		values.put(DataBaseHelper.LONGITUDE, storeInfo.getLongitude());
+		values.put(DataBaseHelper.LATITUDE, storeInfo.getLatitude());
+		values.put(DataBaseHelper.RATING_CLEAN, storeInfo.getRatingClean());
+		values.put(DataBaseHelper.RATING_SERVICE, storeInfo.getRatingService());
+		values.put(DataBaseHelper.RATING_ATMOS, storeInfo.getRatingAtmos());
+		values.put(DataBaseHelper.RATING_FLAVOR, storeInfo.getRatingFlavor());
+		values.put(DataBaseHelper.RATING_UNKNOW, storeInfo.getRatingUnkonw());
+		values.put(DataBaseHelper.IS_BLOCKED, storeInfo.isBlocked());
+		values.put(DataBaseHelper.IS_FAVOR, storeInfo.isFavor());
+		values.put(DataBaseHelper.TAGS, tags);
+		return database.insertWithOnConflict(DataBaseHelper.TABLE_STORE_INFO,
+				null, values, SQLiteDatabase.CONFLICT_IGNORE);
+	}
+
+	@Deprecated
+	public StoreInfo getStoreInfo(long storeId) {
+
+		Cursor cursor = database.query(DataBaseHelper.TABLE_STORE_INFO,
+				columns, DataBaseHelper.STORE_ID + "=?",
+				new String[] { String.valueOf(storeId) }, null, null, null);
+
+		cursor.moveToFirst();
+		StoreInfo storeInfo = cursorTo(cursor);
+
+		// make sure to close the cursor
+		cursor.close();
+		return storeInfo;
+	}
+
+	@Deprecated
+	public List<StoreInfo> getAllStoreInfos() {
+		List<StoreInfo> storeInfos = new ArrayList<StoreInfo>();
+
+		Cursor cursor = database.query(DataBaseHelper.TABLE_STORE_INFO,
+				columns, null, null, null, null, null);
+
+		cursor.moveToFirst();
+		while (!cursor.isAfterLast()) {
+			StoreInfo storeInfo = cursorTo(cursor);
+			storeInfos.add(storeInfo);
+			cursor.moveToNext();
+		}
+		// make sure to close the cursor
+		cursor.close();
+		return storeInfos;
+	}
+
+	@Override
+	protected void setAllColumns() {
+		columns = new String[] { DataBaseHelper.STORE_ID,
+				DataBaseHelper.GOOGLE_STORE_ID, DataBaseHelper.NAME,
+				DataBaseHelper.ADDRESS, DataBaseHelper.PHONE,
+				DataBaseHelper.LONGITUDE, DataBaseHelper.LATITUDE,
+				DataBaseHelper.FIRST_LEVEL, DataBaseHelper.THIRD_LEVEL,
+				DataBaseHelper.RATING_CLEAN, DataBaseHelper.RATING_SERVICE,
+				DataBaseHelper.RATING_ATMOS, DataBaseHelper.RATING_FLAVOR,
+				DataBaseHelper.RATING_UNKNOW, DataBaseHelper.IS_FAVOR,
+				DataBaseHelper.IS_BLOCKED, DataBaseHelper.TAGS };
+	}
+
+	@Override
+	protected StoreInfo cursorTo(Cursor cursor) {
+		long storeId = cursor.getLong(cursor
+				.getColumnIndex(DataBaseHelper.STORE_ID));
+		String googleStoreId = cursor.getString(cursor
+				.getColumnIndex(DataBaseHelper.GOOGLE_STORE_ID));
+		String name = cursor.getString(cursor
+				.getColumnIndex(DataBaseHelper.NAME));
+		String address = cursor.getString(cursor
+				.getColumnIndex(DataBaseHelper.ADDRESS));
+		String phone = cursor.getString(cursor
+				.getColumnIndex(DataBaseHelper.PHONE));
+		double longitude = cursor.getDouble(cursor
+				.getColumnIndex(DataBaseHelper.LONGITUDE));
+		double latitude = cursor.getDouble(cursor
+				.getColumnIndex(DataBaseHelper.LATITUDE));
+		String firstLevel = cursor.getString(cursor
+				.getColumnIndex(DataBaseHelper.FIRST_LEVEL));
+		String thirdLevel = cursor.getString(cursor
+				.getColumnIndex(DataBaseHelper.THIRD_LEVEL));
+		float ratingClean = cursor.getFloat(cursor
+				.getColumnIndex(DataBaseHelper.RATING_CLEAN));
+		float ratingService = cursor.getFloat(cursor
+				.getColumnIndex(DataBaseHelper.RATING_SERVICE));
+		float ratingAtmos = cursor.getFloat(cursor
+				.getColumnIndex(DataBaseHelper.RATING_ATMOS));
+		float ratingFlavor = cursor.getFloat(cursor
+				.getColumnIndex(DataBaseHelper.RATING_FLAVOR));
+		float ratingUnknow = cursor.getFloat(cursor
+				.getColumnIndex(DataBaseHelper.RATING_UNKNOW));
+		boolean isFavor = cursor.getInt(cursor
+				.getColumnIndex(DataBaseHelper.IS_FAVOR)) == 1 ? true : false;
+		boolean isBlocked = cursor.getInt(cursor
+				.getColumnIndex(DataBaseHelper.IS_BLOCKED)) == 1 ? true : false;
+		String[] tags = cursor.getString(
+				cursor.getColumnIndex(DataBaseHelper.TAGS)).split(",");
+
+		StoreInfo storeInfo = new StoreInfo(storeId, googleStoreId, name,
+				address, phone, longitude, latitude, firstLevel, thirdLevel,
+				ratingClean, ratingService, ratingAtmos, ratingFlavor,
+				ratingUnknow, isFavor, isBlocked, tags);
+		return storeInfo;
+	}
+
+	@Override
+	public List<Long> save(List<StoreInfo> objects) {
+		List<Long> saveIds = new ArrayList<Long>(objects.size());
+		for (StoreInfo storeInfo : objects) {
+			String tags = "";
+			for (String tag : storeInfo.getTags()) {
+				tags += tag + ",";
+			}
+			tags.substring(0, tags.lastIndexOf(","));
+
+			ContentValues values = new ContentValues();
+			values.put(DataBaseHelper.STORE_ID, storeInfo.getStoreId());
+			values.put(DataBaseHelper.GOOGLE_STORE_ID,
+					storeInfo.getGoogleStoreId());
+			values.put(DataBaseHelper.NAME, storeInfo.getName());
+			values.put(DataBaseHelper.ADDRESS, storeInfo.getAddress());
+			values.put(DataBaseHelper.PHONE, storeInfo.getPhone());
+			values.put(DataBaseHelper.LONGITUDE, storeInfo.getLongitude());
+			values.put(DataBaseHelper.LATITUDE, storeInfo.getLatitude());
+			values.put(DataBaseHelper.RATING_CLEAN, storeInfo.getRatingClean());
+			values.put(DataBaseHelper.RATING_SERVICE,
+					storeInfo.getRatingService());
+			values.put(DataBaseHelper.RATING_ATMOS, storeInfo.getRatingAtmos());
+			values.put(DataBaseHelper.RATING_FLAVOR,
+					storeInfo.getRatingFlavor());
+			values.put(DataBaseHelper.RATING_UNKNOW,
+					storeInfo.getRatingUnkonw());
+			values.put(DataBaseHelper.IS_BLOCKED, storeInfo.isBlocked());
+			values.put(DataBaseHelper.IS_FAVOR, storeInfo.isFavor());
+			values.put(DataBaseHelper.TAGS, tags);
+			saveIds.add(database.insertWithOnConflict(
+					DataBaseHelper.TABLE_STORE_INFO, null, values,
+					SQLiteDatabase.CONFLICT_IGNORE));
+		}
+		return saveIds;
+	}
+
+	@Override
+	public void update(StoreInfo storeInfo) {
+		String tags = "";
+		for (String tag : storeInfo.getTags()) {
+			tags += tag + ",";
+		}
+		tags.substring(0, tags.lastIndexOf(","));
+
+		ContentValues values = new ContentValues();
+		values.put(DataBaseHelper.GOOGLE_STORE_ID, storeInfo.getGoogleStoreId());
+		values.put(DataBaseHelper.NAME, storeInfo.getName());
+		values.put(DataBaseHelper.ADDRESS, storeInfo.getAddress());
+		values.put(DataBaseHelper.PHONE, storeInfo.getPhone());
+		values.put(DataBaseHelper.LONGITUDE, storeInfo.getLongitude());
+		values.put(DataBaseHelper.LATITUDE, storeInfo.getLatitude());
+		values.put(DataBaseHelper.RATING_CLEAN, storeInfo.getRatingClean());
+		values.put(DataBaseHelper.RATING_SERVICE, storeInfo.getRatingService());
+		values.put(DataBaseHelper.RATING_ATMOS, storeInfo.getRatingAtmos());
+		values.put(DataBaseHelper.RATING_FLAVOR, storeInfo.getRatingFlavor());
+		values.put(DataBaseHelper.RATING_UNKNOW, storeInfo.getRatingUnkonw());
+		values.put(DataBaseHelper.IS_BLOCKED, storeInfo.isBlocked());
+		values.put(DataBaseHelper.IS_FAVOR, storeInfo.isFavor());
+		values.put(DataBaseHelper.TAGS, tags);
+
+		database.update(DataBaseHelper.TABLE_STORE_INFO, values,
+				DataBaseHelper.STORE_ID + "=?",
+				new String[] { String.valueOf(storeInfo.getStoreId()) });
+
+	}
+
+	@Override
+	public boolean delete(StoreInfo storeInfo) {
+		return database.delete(DataBaseHelper.TABLE_STORE_INFO,
+				DataBaseHelper.STORE_ID + "=?",
+				new String[] { String.valueOf(storeInfo.getStoreId()) }) > 0;
+	}
+
+	@Override
+	public boolean delete(List<StoreInfo> objects) {
+		boolean isDeleted = true;
+		for (StoreInfo storeInfo : objects) {
+			if (database.delete(DataBaseHelper.TABLE_STORE_INFO,
+					DataBaseHelper.STORE_ID + "=?",
+					new String[] { String.valueOf(storeInfo.getStoreId()) }) == 0)
+				isDeleted = false;
+		}
+		return isDeleted;
+	}
+
+	@Override
+	public List<StoreInfo> get() {
+		List<StoreInfo> storeInfos = new ArrayList<StoreInfo>();
+
+		Cursor cursor = database.query(DataBaseHelper.TABLE_STORE_INFO,
+				columns, null, null, null, null, null);
+
+		cursor.moveToFirst();
+		while (!cursor.isAfterLast()) {
+			StoreInfo storeInfo = cursorTo(cursor);
+			storeInfos.add(storeInfo);
+			cursor.moveToNext();
+		}
+		// make sure to close the cursor
+		cursor.close();
+		return storeInfos;
+	}
+
+	@Override
+	public StoreInfo get(long id) {
+		Cursor cursor = database.query(DataBaseHelper.TABLE_STORE_INFO,
+				columns, DataBaseHelper.STORE_ID + "=?",
+				new String[] { String.valueOf(id) }, null, null, null);
+
+		cursor.moveToFirst();
+		StoreInfo storeInfo = cursorTo(cursor);
+
+		// make sure to close the cursor
+		cursor.close();
+		return storeInfo;
+	}
+
+}

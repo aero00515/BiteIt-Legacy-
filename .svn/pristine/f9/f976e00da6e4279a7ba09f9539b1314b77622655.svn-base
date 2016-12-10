@@ -1,0 +1,221 @@
+package edu.utboy.biteit.asynctasks;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+import android.content.res.AssetManager;
+
+public class VolleyTaskManager {
+
+	public static final int STORE_RATIO = 60;
+	public static final int REPORT_RATIO = 50;
+	public static final int FILL_RATIO = 40;
+	public static final int RATING_RATIO = 30;
+	public static final int PHOTO_RATIO = 20;
+	public static final int COMMENT_RATIO = 10;
+
+	private static final String SERVICE_PROPERTIES = "service.properties";
+
+	/**
+	 * static Singleton instance
+	 */
+	private static VolleyTaskManager instance;
+
+	private static String serverUrl;
+	private static String hostName;
+	private static String mediaRoot;
+	private static String port;
+	private static String apiRoot;
+	private static String format;
+	private static String apiNewAccount;
+	private static String apiAuth;
+	private static String apiAccount;
+	private static String apiUserBasic;
+	private static String apiStoreInfo;
+	private static String apiStorePhotoComment;
+	private static String apiPhotoComment;
+	private static String apiFriend;
+	private static String apiUserDetail;
+	private static String apiFeedbackPoint;
+	private static String apiFeedbackPointStatus;
+	private static String apiVerifyUser;
+	private static String apiFoundNewStore;
+	private static String apiFoundNewStorePhotos;
+	private static String apiReportErrorStore;
+	private static String apiReportErrorStorePhotos;
+	private static String apiNotExistStore;
+	private static String apiFeedback;
+
+	/**
+	 * Private constructor for singleton
+	 */
+	private VolleyTaskManager() {
+	}
+
+	/**
+	 * Static getter method for retrieving the singleton instance
+	 */
+	public static VolleyTaskManager getInstance() {
+		if (instance == null) {
+			synchronized (VolleyTaskManager.class) {
+				if (instance == null) {
+					instance = new VolleyTaskManager();
+				}
+			}
+		}
+		return instance;
+	}
+
+	public void init(final AssetManager assetManager) {
+		try {
+			InputStream inputStream = assetManager.open(SERVICE_PROPERTIES);
+			Properties properties = new Properties();
+			properties.load(inputStream);
+
+			VolleyTaskManager.hostName = properties.getProperty("hostname");
+			VolleyTaskManager.port = properties.getProperty("port");
+			VolleyTaskManager.apiRoot = properties.getProperty("apiRoot");
+			VolleyTaskManager.format = properties.getProperty("format");
+			VolleyTaskManager.apiNewAccount = properties
+					.getProperty("apiNewAccount");
+			VolleyTaskManager.apiAuth = properties.getProperty("apiAuth");
+			VolleyTaskManager.apiAccount = properties.getProperty("apiAccount");
+			VolleyTaskManager.apiStoreInfo = properties
+					.getProperty("apiStoreInfo");
+			VolleyTaskManager.apiStorePhotoComment = properties
+					.getProperty("apiStorePhotoComment");
+			VolleyTaskManager.apiPhotoComment = properties
+					.getProperty("apiPhotoComment");
+			VolleyTaskManager.apiFriend = properties.getProperty("apiFriend");
+			VolleyTaskManager.apiUserDetail = properties
+					.getProperty("apiUserDetail");
+			VolleyTaskManager.apiFeedbackPoint = properties
+					.getProperty("apiFeedbackPoint");
+			VolleyTaskManager.apiFeedbackPointStatus = properties
+					.getProperty("apiFeedbackPointStatus");
+			VolleyTaskManager.apiVerifyUser = properties
+					.getProperty("apiVerifyUser");
+			VolleyTaskManager.apiFoundNewStore = properties
+					.getProperty("apiFoundNewStore");
+			VolleyTaskManager.apiFoundNewStorePhotos = properties
+					.getProperty("apiFoundNewStorePhotos");
+			VolleyTaskManager.apiReportErrorStore = properties
+					.getProperty("apiReportErrorStore");
+			VolleyTaskManager.apiReportErrorStorePhotos = properties
+					.getProperty("apiReportErrorStorePhotos");
+			VolleyTaskManager.apiNotExistStore = properties
+					.getProperty("apiNotExistStore");
+			VolleyTaskManager.apiUserBasic = properties
+					.getProperty("apiUserBasic");
+			VolleyTaskManager.apiFeedback = properties
+					.getProperty("apiFeedback");
+			VolleyTaskManager.mediaRoot = properties.getProperty("media_root");
+			VolleyTaskManager.serverUrl = "http://" + hostName + ":" + port
+					+ "/" + apiRoot + "/";
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Ex:<br>
+	 * http://hostname:port/apiRoot/
+	 */
+	public String getServerUrl() {
+		return serverUrl;
+	}
+
+	public String getHostName() {
+		return hostName;
+	}
+
+	public String getMediaRoot() {
+		return mediaRoot;
+	}
+
+	public String getPort() {
+		return port;
+	}
+
+	public String getApiRoot() {
+		return apiRoot;
+	}
+
+	public String getFormat() {
+		return format;
+	}
+
+	public String getApiNewAccount() {
+		return apiNewAccount;
+	}
+
+	public String getAuth() {
+		return apiAuth;
+	}
+
+	public String getApiAccount() {
+		return apiAccount;
+	}
+
+	public String getApiStoreInfo() {
+		return apiStoreInfo;
+	}
+
+	public String getApiStorePhotoComment() {
+		return apiStorePhotoComment;
+	}
+
+	public String getApiPhotoComment() {
+		return apiPhotoComment;
+	}
+
+	public String getApiFriend() {
+		return apiFriend;
+	}
+
+	public String getApiUserDetail() {
+		return apiUserDetail;
+	}
+
+	public String getApiFeedbackPoint() {
+		return apiFeedbackPoint;
+	}
+
+	public String getApiFeedbackPointStatus() {
+		return apiFeedbackPointStatus;
+	}
+
+	public String getApiVerifyUser() {
+		return apiVerifyUser;
+	}
+
+	public String getApiFoundNewStore() {
+		return apiFoundNewStore;
+	}
+
+	public String getApiFoundNewStorePhotos() {
+		return apiFoundNewStorePhotos;
+	}
+
+	public String getApiReportErrorStore() {
+		return apiReportErrorStore;
+	}
+
+	public String getApiReportErrorStorePhotos() {
+		return apiReportErrorStorePhotos;
+	}
+
+	public String getApiNotExistStore() {
+		return apiNotExistStore;
+	}
+
+	public String getApiUserBasic() {
+		return apiUserBasic;
+	}
+
+	public String getApiFeedback() {
+		return apiFeedback;
+	}
+
+}

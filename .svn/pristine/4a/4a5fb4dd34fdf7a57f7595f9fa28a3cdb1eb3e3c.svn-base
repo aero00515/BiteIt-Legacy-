@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#88888888"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
+    tools:ignore="overdraw" >
+
+    <TextView
+        android:id="@+id/undo_row_texttv"
+        android:layout_width="@dimen/undo_row_textview_width"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:padding="@dimen/undo_row_textview_padding"
+        android:text="@string/itemdeleted"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/undo_row_textview_textsize" />
+
+    <View
+        android:layout_width="@dimen/undo_row_view_width"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/undo_row_view_margin"
+        android:background="@android:color/white"
+        tools:ignore="PxUsage" />
+
+    <Button
+        android:id="@+id/undo_row_undobutton"
+        android:layout_width="@dimen/undo_row_button_width"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="@null"
+        android:drawableLeft="@drawable/ic_undo"
+        android:drawableStart="@drawable/ic_undo"
+        android:padding="@dimen/undo_row_button_padding"
+        android:paddingLeft="@dimen/undo_row_button_padding_left_right"
+        android:paddingRight="@dimen/undo_row_button_padding_left_right"
+        android:text="@string/taptoundo"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/undo_row_button_textsize" />
+
+</LinearLayout>

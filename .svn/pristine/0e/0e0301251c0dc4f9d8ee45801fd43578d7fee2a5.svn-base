@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+        
+        <RelativeLayout
+            android:id="@+id/RelativeLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/foundnewstore_text_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/foundnewstore_name"
+            android:layout_marginLeft="20dp"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <EditText
+            android:id="@+id/foundnewstore_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/foundnewstore_address"
+            android:layout_alignBottom="@+id/foundnewstore_text_name"
+            android:layout_toRightOf="@+id/foundnewstore_text_name"
+            android:layout_marginRight="20dp"
+            android:ems="10" >
+
+            <requestFocus />
+        </EditText>
+
+        <TextView
+            android:id="@+id/foundnewstore_text_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/foundnewstore_text_name"
+            android:text="@string/foundnewstore_address"
+            android:layout_marginLeft="20dp"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <EditText
+            android:id="@+id/foundnewstore_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/foundnewstore_tel"
+            android:layout_alignBottom="@+id/foundnewstore_text_address"
+            android:layout_toRightOf="@+id/foundnewstore_text_name"
+            android:layout_marginRight="20dp"
+            android:ems="10" />
+
+        <TextView
+            android:id="@+id/foundnewstore_text_tel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/foundnewstore_text_address"
+            android:text="@string/foundnewstore_tel"
+            android:layout_marginLeft="20dp"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <EditText
+            android:id="@+id/foundnewstore_tel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/foundnewstore_text_tel"
+            android:layout_toRightOf="@+id/foundnewstore_text_address"
+            android:layout_marginRight="20dp"
+            android:ems="10" />
+
+    </RelativeLayout>
+    
+        <edu.utboy.biteit.PagerContainer
+            android:id="@+id/foundnewstore_pager_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="4"
+            android:background="#FFA500" >
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/foundnewstore_pager"
+                android:layout_width="65dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_horizontal" />
+        </edu.utboy.biteit.PagerContainer>
+        
+    </LinearLayout>
+
+</LinearLayout>

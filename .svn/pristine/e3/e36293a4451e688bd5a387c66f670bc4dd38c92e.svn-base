@@ -1,0 +1,244 @@
+package edu.utboy.biteit.asynctasks;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.MediaStore;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+
+import edu.utboy.biteit.asynctasks.requestqueues.SampleRequestQueue;
+import edu.utboy.biteit.asynctasks.requests.MyJsonObjectRequest;
+import edu.utboy.biteit.asynctasks.requests.NewStoreMutlipartRequest;
+import edu.utboy.biteit.models.Friend;
+import edu.utboy.biteit.models.NewStore;
+import edu.utboy.biteit.utils.AuthUser;
+
+public class FoundNewStoreRequest {
+
+	/**
+	 * static Singleton instance
+	 */
+	private static FoundNewStoreRequest mFoundNewStoreRequest;
+	private VolleyTaskManager mVolleyTaskManager;
+
+	/**
+	 * Private constructor for singleton
+	 */
+	private FoundNewStoreRequest() {
+		mVolleyTaskManager = VolleyTaskManager.getInstance();
+	}
+
+	/**
+	 * Static getter method for retrieving the singleton instance
+	 */
+	public static FoundNewStoreRequest getInstance() {
+		if (mFoundNewStoreRequest == null) {
+			synchronized (FoundNewStoreRequest.class) {
+				if (mFoundNewStoreRequest == null) {
+					mFoundNewStoreRequest = new FoundNewStoreRequest();
+				}
+			}
+		}
+		return mFoundNewStoreRequest;
+	}
+
+	public void reportError(final Context context, final long storeId,
+			JSONObject requestBody, final JSONArray requestPhotos,
+			final Response.Listener<JSONObject> responseListener,
+			final Response.ErrorListener errorListener) {
+		if (isInit()) {
+			String url = mVolleyTaskManager.getServerUrl()
+					+ mVolleyTaskManager.getApiReportErrorStore() + "/";
+			try {
+				requestBody.put("store_id", storeId);
+			} catch (JSONException e1) {
+				e1.printStackTrace();
+			}
+			MyJsonObjectRequest jsonRequest = new MyJsonObjectRequest(
+					Request.Method.POST, url, requestBody,
+					new Response.Listener<JSONObject>() {
+
+						@Override
+						public void onResponse(JSONObject response) {
+							try {
+								int len = requestPhotos.length();
+								for (int i = 0; i < len; i++) {
+									JSONObject json = requestPhotos
+											.getJSONObject(i);
+									json.put("store_id", storeId);
+									Uri uri = Uri.parse(json.getString("uri"));
+									json.remove("uri");
+									reportErrorPhotos(context, json, new File(
+											uri.getPath()), responseListener,
+											errorListener);
+								}
+							} catch (JSONException e) {
+								e.printStackTrace();
+							}
+						}
+					}, errorListener);
+			SampleRequestQueue.getSampleRequestQueue(context)
+					.addToRequestQueue(jsonRequest);
+		}
+	}
+
+	private void reportErrorPhotos(Context context, JSONObject requestBody,
+			File file, Response.Listener<JSONObject> responseListener,
+			Response.ErrorListener errorListener) {
+		if (isInit()) {
+			String url = mVolleyTaskManager.getServerUrl()
+					+ mVolleyTaskManager.getApiReportErrorStorePhotos() + "/";
+			NewStoreMutlipartRequest jsonRequest = new NewStoreMutlipartRequest(
+					url, errorListener, responseListener, file, requestBody);
+			SampleRequestQueue.getSampleRequestQueue(context)
+					.addToRequestQueue(jsonRequest);
+		}
+	}
+
+	public void foundNewStore(final Context context, JSONObject requestBody,
+			final JSONArray requestPhotos,
+			final Response.Listener<JSONObject> responseListener,
+			final Response.ErrorListener errorListener) {
+		if (isInit()) {
+			String url = mVolleyTaskManager.getServerUrl()
+					+ mVolleyTaskManager.getApiFoundNewStore() + "/";
+			MyJsonObjectRequest jsonRequest = new MyJsonObjectRequest(
+					Request.Method.POST, url, requestBody,
+					new Response.Listener<JSONObject>() {
+
+						@Override
+						public void onResponse(JSONObject response) {
+							MyLog.d(FoundNewStoreRequest.class,
+									"" + response.toString());
+							try {
+								long id = response.getLong("id");
+								int len = requestPhotos.length();
+								for (int i = 0; i < len; i++) {
+									JSONObject json = requestPhotos
+											.getJSONObject(i);
+									json.put("new_store_id", id);
+									Uri uri = Uri.parse(json.getString("uri"));
+									json.remove("uri");
+									foundNewStorePhotos(
+											context,
+											json,
+											new File(getRealPathFromURI(
+													context, uri)),
+											responseListener, errorListener);
+								}
+							} catch (JSONException e) {
+								e.printStackTrace();
+							}
+						}
+					}, errorListener);
+			SampleRequestQueue.getSampleRequestQueue(context)
+					.addToRequestQueue(jsonRequest);
+		}
+	}
+
+	private void foundNewStorePhotos(Context context, JSONObject requestBody,
+			File file, Response.Listener<JSONObject> responseListener,
+			Response.ErrorListener errorListener) {
+		if (isInit()) {
+			String url = mVolleyTaskManager.getServerUrl()
+					+ mVolleyTaskManager.getApiFoundNewStorePhotos() + "/";
+			NewStoreMutlipartRequest jsonRequest = new NewStoreMutlipartRequest(
+					url, errorListener, responseListener, file, requestBody);
+			SampleRequestQueue.getSampleRequestQueue(context)
+					.addToRequestQueue(jsonRequest);
+		}
+	}
+
+	public void notExists(Context context, JSONObject jsonPostRequest,
+			Response.Listener<JSONObject> responseListener,
+			Response.ErrorListener errorListener) {
+		if (isInit()) {
+			String url = mVolleyTaskManager.getServerUrl()
+					+ mVolleyTaskManager.getApiNotExistStore() + "/";
+			MyJsonObjectRequest jsonRequest = new MyJsonObjectRequest(
+					Request.Method.POST, url, jsonPostRequest,
+					responseListener, errorListener);
+			SampleRequestQueue.getSampleRequestQueue(context)
+					.addToRequestQueue(jsonRequest);
+		}
+	}
+
+	public String getRealPathFromURI(Context context, Uri contentUri) {
+		Cursor cursor = null;
+		try {
+			String[] proj = { MediaStore.Images.Media.DATA };
+			cursor = context.getContentResolver().query(contentUri, proj, null,
+					null, null);
+			int column_index = cursor
+					.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+			cursor.moveToFirst();
+			return cursor.getString(column_index);
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
+
+	public JSONObject createNewStoreJson(NewStore newStore)
+			throws JSONException {
+		JSONObject json = new JSONObject();
+		// 'id', 'user_id', 'name', 'address', 'phone', 'longitude', 'latitude',
+		// 'first_level', 'third_level', 'created_at', 'updated_at'
+		json.put("user_id", AuthUser.getId());
+		json.put("name", newStore.getName());
+		json.put("address", newStore.getAddress());
+		json.put("phone", newStore.getPhone());
+		json.put("longitude", newStore.getLongitude());
+		json.put("latitude", newStore.getLatitude());
+		json.put("first_level", newStore.getFirstLevel());
+		json.put("third_level", newStore.getThirdLevel());
+		return json;
+	}
+
+	public JSONArray createPhotosJsonArray(List<NewStore.Photo> photos)
+			throws JSONException {
+		JSONArray array = new JSONArray();
+		// 'id', 'new_store_id', 'user_id', 'photo', 'comment'
+		for (NewStore.Photo photo : photos) {
+			JSONObject json = new JSONObject();
+			json.put("user_id", AuthUser.getId());
+			json.put("uri", photo.getUri());
+			json.put("comment", photo.getComment());
+			array.put(json);
+		}
+		return array;
+	}
+
+	public JSONObject getQueryAll() {
+		return new JSONObject();
+	}
+
+	public List<Friend> getFriendsUsingResponse(JSONObject response) {
+		List<Friend> friends = new ArrayList<Friend>();
+		// TODO fill friend objects
+		return friends;
+	}
+
+	private boolean isInit() {
+		if (mVolleyTaskManager.getServerUrl() == null) {
+			MyLog.e(FoundNewStoreRequest.class,
+					"VolleyTaskManager needs to be init before using request!");
+			return false;
+		}
+		return true;
+	}
+
+}

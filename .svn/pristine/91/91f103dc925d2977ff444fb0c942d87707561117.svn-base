@@ -1,0 +1,107 @@
+package edu.utboy.biteit.models.dao;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
+import edu.utboy.biteit.db.DataBaseHelper;
+import edu.utboy.biteit.models.Friend;
+
+public class FriendDAO {
+
+	private SQLiteDatabase database;
+	private DataBaseHelper dbHelper;
+	private String[] allColumns = { DataBaseHelper._ID,
+			DataBaseHelper.USERNAME, DataBaseHelper.STORE_ID,
+			DataBaseHelper.NAME, DataBaseHelper.URI, DataBaseHelper.EMAIL,
+			DataBaseHelper.IS_BLOCKED, DataBaseHelper.IS_FOCUSED };
+
+	public FriendDAO(Context ctx) {
+		dbHelper = DataBaseHelper.getDbHelper(ctx);
+	}
+
+	public void open() throws SQLException {
+		database = dbHelper.getWritableDatabase();
+	}
+
+	public void close() {
+		dbHelper.close();
+	}
+
+	/**
+	 * @return the row ID of the newly inserted row, or -1 if an error occurred
+	 */
+	public long save(Friend friend) {
+		ContentValues values = new ContentValues();
+		values.put(DataBaseHelper._ID, friend.getId());
+		values.put(DataBaseHelper.USERNAME, friend.getUserId());
+		values.put(DataBaseHelper.STORE_ID, friend.getStoreId());
+		values.put(DataBaseHelper.NAME, friend.getName());
+		values.put(DataBaseHelper.URI, friend.getPhoto());
+		values.put(DataBaseHelper.EMAIL, friend.getEmail());
+		values.put(DataBaseHelper.IS_BLOCKED, friend.isBlocked());
+		values.put(DataBaseHelper.IS_FOCUSED, friend.isFocued());
+		return database.insert(DataBaseHelper.TABLE_FRIENDS, null, values);
+	}
+
+	public List<Friend> getFriends(long storeId) {
+		List<Friend> friends = new ArrayList<Friend>();
+
+		Cursor cursor = database.query(DataBaseHelper.TABLE_PHOTO_COMMENT,
+				allColumns, DataBaseHelper.STORE_ID + "=?",
+				new String[] { String.valueOf(storeId) }, null, null, null);
+
+		cursor.moveToFirst();
+		while (!cursor.isAfterLast()) {
+			Friend friend = cursorToFriend(cursor);
+			friends.add(friend);
+			cursor.moveToNext();
+		}
+		// make sure to close the cursor
+		cursor.close();
+		return friends;
+	}
+
+	public List<Friend> getAllFriends() {
+		List<Friend> friends = new ArrayList<Friend>();
+
+		Cursor cursor = database.query(DataBaseHelper.TABLE_PHOTO_COMMENT,
+				allColumns, null, null, null, null, null);
+
+		cursor.moveToFirst();
+		while (!cursor.isAfterLast()) {
+			Friend friend = cursorToFriend(cursor);
+			friends.add(friend);
+			cursor.moveToNext();
+		}
+		// make sure to close the cursor
+		cursor.close();
+		return friends;
+	}
+
+	private Friend cursorToFriend(Cursor cursor) {
+		long id = cursor.getLong(cursor.getColumnIndex(DataBaseHelper._ID));
+		String username = cursor.getString(cursor
+				.getColumnIndex(DataBaseHelper.USERNAME));
+		long storeId = cursor.getLong(cursor
+				.getColumnIndex(DataBaseHelper.STORE_ID));
+		String name = cursor.getString(cursor
+				.getColumnIndex(DataBaseHelper.NAME));
+		String uri = cursor
+				.getString(cursor.getColumnIndex(DataBaseHelper.URI));
+		String email = cursor.getString(cursor
+				.getColumnIndex(DataBaseHelper.EMAIL));
+		boolean isBlocked = cursor.getInt(cursor
+				.getColumnIndex(DataBaseHelper.IS_BLOCKED)) == 1 ? true : false;
+		boolean isFocused = cursor.getInt(cursor
+				.getColumnIndex(DataBaseHelper.IS_FOCUSED)) == 1 ? true : false;
+		Friend friend = new Friend(id, username, storeId, name, uri, email,
+				isBlocked, isFocused);
+		return friend;
+	}
+
+}

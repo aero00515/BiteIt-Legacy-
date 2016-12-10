@@ -1,0 +1,84 @@
+package edu.utboy.biteit.asynctasks;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.json.JSONObject;
+
+import android.content.Context;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import edu.utboy.biteit.asynctasks.requestqueues.SampleRequestQueue;
+
+public class VerifyUserRequest {
+	/**
+	 * static Singleton instance
+	 */
+	private static VerifyUserRequest mVerifyUserRequest;
+	private VolleyTaskManager mVolleyTaskManager;
+	private String url;
+
+	/**
+	 * Private constructor for singleton
+	 */
+	private VerifyUserRequest() {
+		mVolleyTaskManager = VolleyTaskManager.getInstance();
+	}
+
+	/**
+	 * Static getter method for retrieving the singleton instance
+	 */
+	public static VerifyUserRequest getInstance() {
+		if (mVerifyUserRequest == null) {
+			synchronized (VerifyUserRequest.class) {
+				if (mVerifyUserRequest == null) {
+					mVerifyUserRequest = new VerifyUserRequest();
+				}
+			}
+		}
+		return mVerifyUserRequest;
+	}
+
+	public void verifyUser(Context context, JSONObject requestBody,
+			Response.Listener<JSONObject> responseListener,
+			Response.ErrorListener errorListener) {
+		if (isInit()) {
+			url = mVolleyTaskManager.getServerUrl()
+					+ mVolleyTaskManager.getApiAccount();
+			JsonObjectRequest jsonRequest = new JsonObjectRequest(
+					Request.Method.POST, url, requestBody, responseListener,
+					errorListener) {
+				@Override
+				public Map<String, String> getHeaders() throws AuthFailureError {
+					HashMap<String, String> maps = new HashMap<String, String>();
+					// TODO get usernamepassword string
+					String content = "";
+					maps.put("Authorization", "Basic " + content);
+					return maps;
+				}
+			};
+			SampleRequestQueue.getSampleRequestQueue(context)
+					.addToRequestQueue(jsonRequest);
+		}
+	}
+
+	public JSONObject getQueryAll() {
+		return null;
+	}
+
+	private boolean isInit() {
+		if (mVolleyTaskManager.getServerUrl() == null) {
+			MyLog.e(VerifyUserRequest.class,
+					"VolleyTaskManager needs to be init before using request!");
+			return false;
+		}
+		return true;
+	}
+
+}

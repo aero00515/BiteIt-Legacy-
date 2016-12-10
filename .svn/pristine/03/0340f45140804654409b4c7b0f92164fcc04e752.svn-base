@@ -1,0 +1,38 @@
+package edu.utboy.biteit.models;
+
+public class MarkerItem {
+
+	private double lat;
+	private double lng;
+	private boolean isInBounds;
+
+	public MarkerItem(double lat, double lng, boolean isInBounds) {
+		this.lat = lat;
+		this.lng = lng;
+		this.isInBounds = isInBounds;
+	}
+
+	public double getLat() {
+		return lat;
+	}
+
+	public void setLat(double lat) {
+		this.lat = lat;
+	}
+
+	public double getLng() {
+		return lng;
+	}
+
+	public void setLng(double lng) {
+		this.lng = lng;
+	}
+
+	public boolean isInBounds() {
+		return isInBounds;
+	}
+
+	public void setInBounds(boolean isInBounds) {
+		this.isInBounds = isInBounds;
+	}
+}

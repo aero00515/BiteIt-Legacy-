@@ -1,0 +1,15 @@
+package edu.utboy.biteit.ui.drawer;
+
+import android.os.Bundle;
+import edu.utboy.biteit.R;
+import edu.utboy.biteit.utils.BaseActivity;
+
+public class AchievementsActivity extends BaseActivity {
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_achievements);
+	}
+
+}

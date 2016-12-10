@@ -1,0 +1,100 @@
+package edu.utboy.biteit;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.ViewPager;
+
+import com.facebook.Session;
+import com.viewpagerindicator.LinePageIndicator;
+
+import edu.utboy.biteit.ui.toturials.MultiLoginFragment;
+import edu.utboy.biteit.ui.toturials.MultiLoginFragment.OnLoginCallback;
+import edu.utboy.biteit.ui.toturials.ToturialFragment;
+
+public class ToturialActivity extends FragmentActivity {
+
+	private List<Fragment> fragments;
+	private MultiLoginFragment mlf;
+	private ViewPager toturialPager;
+	private ToturialPagerAdapter tpa;
+	private LinePageIndicator lpi;
+	private boolean isTutorialShown;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_toturial);
+		mlf = new MultiLoginFragment(onLoginCallback);
+		fragments = new ArrayList<Fragment>(3);
+		fragments.add(mlf);
+		toturialPager = (ViewPager) findViewById(R.id.activity_tutorial_pager);
+		lpi = (LinePageIndicator) findViewById(R.id.toturial_indicator);
+		tpa = new ToturialPagerAdapter(getSupportFragmentManager(), fragments);
+		toturialPager.setAdapter(tpa);
+		lpi.setViewPager(toturialPager);
+	}
+
+	private Fragment getToturialFragment() {
+		ToturialFragment f = new ToturialFragment();
+		return f;
+	}
+
+	private void showNextFragment() {
+		if (!isTutorialShown) {
+			fragments.add(getToturialFragment());
+			fragments.add(getToturialFragment());
+			tpa.notifyDataSetChanged();
+			lpi.notifyDataSetChanged();
+			isTutorialShown = true;
+		}
+	}
+
+	private OnLoginCallback onLoginCallback = new OnLoginCallback() {
+
+		@Override
+		public void onLogin(Bundle data) {
+			if (Session.getActiveSession().isOpened()) {
+				String userId = data.getString(OnLoginCallback.FB_USER_ID);
+				if (userId != null && !userId.isEmpty()) {
+					// TODO save user into temp for request the server's
+					// accesstoken
+					showNextFragment();
+					MyLog.i(ToturialActivity.class,
+							data.getString(OnLoginCallback.TEST_GRAPH_USER));
+				}
+			} else {
+				MyLog.e(ToturialActivity.class, "Fb Session closed");
+			}
+		}
+	};
+
+	private class ToturialPagerAdapter extends FragmentStatePagerAdapter {
+
+		private List<Fragment> fragments;
+
+		public ToturialPagerAdapter(FragmentManager fm, List<Fragment> f) {
+			super(fm);
+			fragments = f;
+		}
+
+		@Override
+		public int getCount() {
+			return fragments.size();
+		}
+
+		@Override
+		public Fragment getItem(int position) {
+			return fragments.get(position);
+		}
+
+	}
+
+}

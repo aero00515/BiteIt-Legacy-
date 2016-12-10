@@ -1,0 +1,158 @@
+package edu.utboy.biteit.models;
+
+import com.google.gson.Gson;
+
+import android.os.Bundle;
+
+public class StoreInfo {
+
+	public final static String ID = "store_info_id";
+	public final static String NAME = "store_info_name";
+	public final static String ADDRESS = "store_info_address";
+	public final static String PHONE = "store_info_phone";
+	public final static String RATING_CLEAN = "store_info_rating_clean";
+	public final static String RATING_SERVICE = "store_info_rating_service";
+	public final static String RATING_PRICE = "store_info_rating_price";
+	public final static String RATING_FAVOR = "store_info_rating_favor";
+	public final static String RATING_UNKNOW = "store_info_rating_unknow";
+	public final static String TAGS = "store_info_tags";
+
+	private long id;
+	private String name;
+	private String address;
+	private String phone;
+	private float ratingClean;
+	private float ratingService;
+	private float ratingPrice;
+	private float ratingFavor;
+	private float ratingUnkonw;
+	private String[] tags;
+
+	public StoreInfo(Bundle data) {
+		this.id = data.getLong(ID);
+		this.name = data.getString(NAME);
+		this.address = data.getString(ADDRESS);
+		this.phone = data.getString(PHONE);
+		this.ratingClean = data.getFloat(RATING_CLEAN);
+		this.ratingService = data.getFloat(RATING_SERVICE);
+		this.ratingPrice = data.getFloat(RATING_PRICE);
+		this.ratingFavor = data.getFloat(RATING_FAVOR);
+		this.ratingUnkonw = data.getFloat(RATING_UNKNOW);
+		this.tags = data.getStringArray(TAGS);
+	}
+
+	public StoreInfo(long id, String name, String address, String phone,
+			float ratingClean, float ratingService, float ratingPrice,
+			float ratingFavor, float ratingUnknow, String[] tags) {
+		this.id = id;
+		this.name = name;
+		this.address = address;
+		this.phone = phone;
+		this.ratingClean = ratingClean;
+		this.ratingService = ratingService;
+		this.ratingPrice = ratingPrice;
+		this.ratingFavor = ratingFavor;
+		this.ratingUnkonw = ratingUnknow;
+		this.tags = tags;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public float getRatingClean() {
+		return ratingClean;
+	}
+
+	public void setRatingClean(float ratingClean) {
+		this.ratingClean = ratingClean;
+	}
+
+	public float getRatingService() {
+		return ratingService;
+	}
+
+	public void setRatingService(float ratingService) {
+		this.ratingService = ratingService;
+	}
+
+	public float getRatingPrice() {
+		return ratingPrice;
+	}
+
+	public void setRatingPrice(float ratingPrice) {
+		this.ratingPrice = ratingPrice;
+	}
+
+	public float getRatingFavor() {
+		return ratingFavor;
+	}
+
+	public void setRatingFavor(float ratingFavor) {
+		this.ratingFavor = ratingFavor;
+	}
+
+	public float getRatingUnkonw() {
+		return ratingUnkonw;
+	}
+
+	public void setRatingUnkonw(float ratingUnkonw) {
+		this.ratingUnkonw = ratingUnkonw;
+	}
+
+	public String[] getTags() {
+		return tags;
+	}
+
+	public void setTags(String[] tags) {
+		this.tags = tags;
+	}
+
+	public Bundle save() {
+		Bundle data = new Bundle();
+		data.putLong(ID, getId());
+		data.putString(NAME, getName());
+		data.putString(ADDRESS, getAddress());
+		data.putString(PHONE, getPhone());
+		data.putFloat(RATING_CLEAN, getRatingClean());
+		data.putFloat(RATING_SERVICE, getRatingService());
+		data.putFloat(RATING_PRICE, getRatingPrice());
+		data.putFloat(RATING_FAVOR, getRatingFavor());
+		data.putFloat(RATING_UNKNOW, getRatingUnkonw());
+		data.putStringArray(TAGS, getTags());
+		return data;
+	}
+
+	@Override
+	public String toString() {
+		return new Gson().toJson(StoreInfo.this);
+	}
+}

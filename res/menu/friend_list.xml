@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="edu.utboy.biteit.ui.StoreInfoActivity" >
+
+    <item
+        android:id="@+id/action_switch"
+        android:icon="@drawable/switch_hate"
+        android:title="@string/action_blocked"
+        app:showAsAction="ifRoom"/>
+
+</menu>

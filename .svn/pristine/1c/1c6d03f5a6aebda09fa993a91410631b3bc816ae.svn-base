@@ -1,0 +1,156 @@
+package edu.utboy.biteit.ui.pages;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+
+import edu.utboy.biteit.R;
+import edu.utboy.biteit.models.PhotoComment;
+
+public class PhotoCommentFragment extends Fragment {
+
+	private final static int REQUEST_IMAGE_CAPTURE = 1;
+
+	private View rootView;
+	private ImageButton takePhotoButton;
+	private ListView photoListView;
+	private PhotoListViewAdapter photoListViewAdapter;
+
+	private List<PhotoComment> photos;
+	private Bundle photoCommentData;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		photoListViewAdapter = new PhotoListViewAdapter();
+		photos = new ArrayList<PhotoComment>();
+		photoCommentData = getArguments();
+
+		// TODO: after store db has created, bundle must have store id inside
+		if (photoCommentData == null) {
+			photoCommentData = new Bundle();
+		}
+	}
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		rootView = inflater.inflate(R.layout.fragment_photo_comment, container,
+				false);
+		takePhotoButton = (ImageButton) rootView
+				.findViewById(R.id.activity_store_info_feedback_add_photo_btn);
+		photoListView = (ListView) rootView
+				.findViewById(R.id.activity_store_info_feedback_added_photo_listview);
+
+		takePhotoButton.setOnClickListener(takePhotoListener);
+		photoListView.setAdapter(photoListViewAdapter);
+
+		return rootView;
+	}
+
+	private OnClickListener takePhotoListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			Intent takePictureIntent = new Intent(
+					MediaStore.ACTION_IMAGE_CAPTURE);
+			if (takePictureIntent.resolveActivity(getActivity()
+					.getPackageManager()) != null) {
+				startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+			}
+		}
+	};
+
+	public Bundle getPhotoCommentData() {
+		return photoCommentData;
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		switch (requestCode) {
+		case REQUEST_IMAGE_CAPTURE:
+			if (resultCode == Activity.RESULT_OK) {
+				MyLog.d(PhotoCommentFragment.class,
+						"data at: " + data.getData());
+				PhotoComment photoComment = new PhotoComment(0, 0, 0,
+						data.getData(), "");
+				photoCommentData.putBundle(
+						String.valueOf(photoComment.getId()),
+						photoComment.save());
+				photos.add(photoComment);
+				photoListViewAdapter.notifyDataSetChanged();
+				// MyLog.d(getClass(), photoComment.toString());
+			} else if (resultCode == Activity.RESULT_CANCELED) {
+				// User cancelled the image capture
+			} else {
+				// Image capture failed, advise user
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	private class PhotoListViewAdapter extends BaseAdapter {
+
+		@Override
+		public int getCount() {
+			return photos.size();
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return photos.get(position);
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return photos.get(position).getId();
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			PhotoComment photoComment = photos.get(position);
+			if (convertView == null) {
+				convertView = getActivity().getLayoutInflater().inflate(
+						R.layout.added_photo_listview_style, parent, false);
+			}
+			ImageView photoImageView = (ImageView) convertView
+					.findViewById(R.id.added_photo_imageview);
+			TextView commentTextView = (TextView) convertView
+					.findViewById(R.id.added_comment_textview);
+			// TODO: adjust the problem of orientation,
+			// portrait will be landscape
+			commentTextView.setText(photoComment.getComment());
+
+			DisplayImageOptions dio = new DisplayImageOptions.Builder()
+					.considerExifParams(true).build();
+			ImageLoader.getInstance().displayImage(
+					photoComment.getUri().toString(), photoImageView, dio);
+			return convertView;
+		}
+
+	}
+
+}

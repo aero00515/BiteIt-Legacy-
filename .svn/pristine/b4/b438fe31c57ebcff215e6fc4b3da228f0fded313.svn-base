@@ -1,0 +1,391 @@
+package edu.utboy.biteit;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+
+import java.io.IOException;
+import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.IntentService;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Bundle;
+import android.util.Base64;
+
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+import edu.utboy.biteit.asynctasks.FeedbackPointRequest;
+import edu.utboy.biteit.asynctasks.FriendsRequest;
+import edu.utboy.biteit.asynctasks.UserDetailRequest;
+import edu.utboy.biteit.asynctasks.VolleyTaskManager;
+import edu.utboy.biteit.models.Friend;
+import edu.utboy.biteit.models.dao.FriendDAO;
+import edu.utboy.biteit.utils.AuthToken;
+import edu.utboy.biteit.utils.AuthUser;
+
+public class SyncUserDataService extends IntentService {
+
+	public SyncUserDataService() {
+		super("SyncUserDataService");
+	}
+
+	public static final String ACTION_SYNC = "SyncUserDataService";
+	public static final String SAVE_DATA = "save_data";
+	public static final String SYNC_DATA = "sync_data";
+	public static final String SHARED_PREFERENCED_DB_NAME = "bite.it.sp";
+	public static final String SHARED_PREFERENCED_BASE = "sp_base";
+	public static final String SHARED_PREFERENCED_TOKEN = "sp_token";
+
+	public static final String SHARED_PREFERENCED_ID = "sp_id";
+	public static final String SHARED_PREFERENCED_USERNAME = "sp_username";
+	public static final String SHARED_PREFERENCED_NAME = "sp_name";
+	public static final String SHARED_PREFERENCED_EMAIL = "sp_email";
+	public static final String SHARED_PREFERENCED_LOGIN_TYPE = "sp_login_type";
+	public static final String SHARED_PREFERENCED_THIRD_ID = "sp_third_id";
+	public static final String SHARED_PREFERENCED_GCM_ID = "sp_gcm_id";
+
+	public static final String EXTRA_MESSAGE = "message";
+	public static final String PROPERTY_REG_ID = "registration_id";
+	private static final String PROPERTY_APP_VERSION = "appVersion";
+
+	private String regid;
+	private Bundle dataPassby;
+
+	private void saveUserDetail(int id, String username, String name,
+			String email, String loginType, String thirdId, String gcmId) {
+		SharedPreferences.Editor spe = getSharedPreferences(
+				SHARED_PREFERENCED_DB_NAME, MODE_PRIVATE).edit();
+		spe.putInt(SHARED_PREFERENCED_ID, id);
+		spe.putString(SHARED_PREFERENCED_USERNAME, username);
+		spe.putString(SHARED_PREFERENCED_NAME, name);
+		spe.putString(SHARED_PREFERENCED_EMAIL, email);
+		spe.putString(SHARED_PREFERENCED_LOGIN_TYPE, loginType);
+		spe.putString(SHARED_PREFERENCED_THIRD_ID, thirdId);
+		spe.putString(SHARED_PREFERENCED_GCM_ID, gcmId);
+		AuthToken.saveGCMId(gcmId);
+		AuthUser.setId(id);
+		spe.commit();
+	}
+
+	private void saveAuth(String userpass, String token) {
+		SharedPreferences.Editor spe = getSharedPreferences(
+				SHARED_PREFERENCED_DB_NAME, MODE_PRIVATE).edit();
+		spe.putString(SHARED_PREFERENCED_BASE,
+				Base64.encodeToString(userpass.getBytes(), Base64.DEFAULT));
+		spe.putString(SHARED_PREFERENCED_TOKEN, token);
+		AuthToken.saveToken(token);
+		spe.commit();
+	}
+
+	private void syncUserPreference() {
+		Intent intent = new Intent();
+		intent.setAction(ACTION_SYNC);
+		Bundle data = new Bundle();
+		SharedPreferences sharedPreferenced = getSharedPreferences(
+				SHARED_PREFERENCED_DB_NAME, Context.MODE_PRIVATE);
+
+		int id = sharedPreferenced.getInt(SHARED_PREFERENCED_ID, 0);
+		String name = sharedPreferenced.getString(SHARED_PREFERENCED_NAME, "");
+		String email = sharedPreferenced
+				.getString(SHARED_PREFERENCED_EMAIL, "");
+		String loginType = sharedPreferenced.getString(
+				SHARED_PREFERENCED_LOGIN_TYPE, "");
+		String thirdId = sharedPreferenced.getString(
+				SHARED_PREFERENCED_THIRD_ID, "");
+
+		data.putString(SHARED_PREFERENCED_BASE,
+				sharedPreferenced.getString(SHARED_PREFERENCED_BASE, ""));
+		data.putString(SHARED_PREFERENCED_TOKEN,
+				sharedPreferenced.getString(SHARED_PREFERENCED_TOKEN, ""));
+		data.putInt(SHARED_PREFERENCED_ID, id);
+		data.putString(SHARED_PREFERENCED_USERNAME,
+				sharedPreferenced.getString(SHARED_PREFERENCED_USERNAME, ""));
+		data.putString(SHARED_PREFERENCED_NAME, name);
+		data.putString(SHARED_PREFERENCED_EMAIL, email);
+		data.putString(SHARED_PREFERENCED_LOGIN_TYPE, loginType);
+		data.putString(SHARED_PREFERENCED_THIRD_ID, thirdId);
+		data.putString(SHARED_PREFERENCED_GCM_ID,
+				sharedPreferenced.getString(SHARED_PREFERENCED_GCM_ID, ""));
+		AuthToken.saveGCMId(sharedPreferenced.getString(
+				SHARED_PREFERENCED_GCM_ID, ""));
+		AuthToken.saveToken(sharedPreferenced.getString(
+				SHARED_PREFERENCED_TOKEN, ""));
+		AuthUser.setId(id);
+		AuthUser.setName(name);
+		AuthUser.setEmail(email);
+		if (loginType.equals("facebook")) {
+			AuthUser.setPicUrl("http://graph.facebook.com/v2.1/" + thirdId
+					+ "/picture?type=large");
+		}
+		if (dataPassby != null) {
+			intent.putExtra("passby", dataPassby);
+		}
+		intent.putExtra(SYNC_DATA, data);
+		sendBroadcast(intent);
+	}
+
+	/**
+	 * Stores the registration ID and app versionCode in the application's
+	 * {@code SharedPreferences}.
+	 * 
+	 * @param context
+	 *            application's context.
+	 * @param regId
+	 *            registration ID
+	 */
+	private void storeRegistrationId(Context context, String regId) {
+		final SharedPreferences prefs = getGCMPreferences(context);
+		int appVersion = getAppVersion(context);
+		MyLog.i(SyncUserDataService.class, "Saving regId on app version "
+				+ appVersion);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putString(PROPERTY_REG_ID, regId);
+		editor.putInt(PROPERTY_APP_VERSION, appVersion);
+		editor.commit();
+	}
+
+	/**
+	 * @return Application's version code from the {@code PackageManager}.
+	 */
+	private static int getAppVersion(Context context) {
+		try {
+			PackageInfo packageInfo = context.getPackageManager()
+					.getPackageInfo(context.getPackageName(), 0);
+			return packageInfo.versionCode;
+		} catch (NameNotFoundException e) {
+			// should never happen
+			throw new RuntimeException("Could not get package name: " + e);
+		}
+	}
+
+	/**
+	 * @return Application's {@code SharedPreferences}.
+	 */
+	private SharedPreferences getGCMPreferences(Context context) {
+		// This sample app persists the registration ID in shared preferences,
+		// but
+		// how you store the regID in your app is up to you.
+		return getSharedPreferences(TutorialActivity.class.getSimpleName(),
+				Context.MODE_PRIVATE);
+	}
+
+	/**
+	 * Gets the current registration ID for application on GCM service.
+	 * <p>
+	 * If result is empty, the app needs to register.
+	 * 
+	 * @return registration ID, or empty string if there is no existing
+	 *         registration ID.
+	 */
+	private String getRegistrationId(Context context, long id) {
+		final SharedPreferences prefs = getGCMPreferences(context);
+		String registrationId = prefs.getString(PROPERTY_REG_ID, "");
+		if (registrationId.isEmpty()) {
+			MyLog.i(SyncUserDataService.class, "Registration not found.");
+			return "";
+		}
+		// Check if app was updated; if so, it must clear the registration ID
+		// since the existing regID is not guaranteed to work with the new
+		// app version.
+		int registeredVersion = prefs.getInt(PROPERTY_APP_VERSION,
+				Integer.MIN_VALUE);
+		int currentVersion = getAppVersion(context);
+		if (registeredVersion != currentVersion) {
+			MyLog.i(TutorialActivity.class, "App version changed.");
+			// registered new gcm id
+			GoogleCloudMessaging gcm = GoogleCloudMessaging
+					.getInstance(SyncUserDataService.this);
+
+			String regid = "";
+			try {
+				regid = gcm.register(TutorialActivity.SENDER_ID);
+				JSONObject userDetail = UserDetailRequest.getInstance()
+						.createUserDetailJsonObject(regid);
+				UserDetailRequest.getInstance().updateDetail(
+						SyncUserDataService.this, id, userDetail,
+						new Response.Listener<JSONObject>() {
+
+							@Override
+							public void onResponse(JSONObject response) {
+								VolleyLog.d("res " + response.toString());
+							}
+						}, new Response.ErrorListener() {
+
+							@Override
+							public void onErrorResponse(VolleyError error) {
+								VolleyLog.e("error " + error.toString());
+							}
+						});
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+
+			return regid;
+		}
+		return registrationId;
+	}
+
+	private void setFeedbackPointTable(int id) throws JSONException {
+		JSONObject feedbackRequestBody = FeedbackPointRequest.getInstance()
+				.createFeedbackPointRequestBody(id, 0, 0, 0, 0, 0, 0, 0);
+		FeedbackPointRequest.getInstance().addFeedbackPoint(
+				getApplicationContext(), feedbackRequestBody,
+				new Response.Listener<JSONObject>() {
+
+					@Override
+					public void onResponse(JSONObject response) {
+						MyLog.e(SyncUserDataService.class,
+								"" + response.toString());
+					}
+				}, new Response.ErrorListener() {
+
+					@Override
+					public void onErrorResponse(VolleyError error) {
+						MyLog.e(SyncUserDataService.class,
+								"" + error.toString());
+					}
+				});
+	}
+
+	private void addFriendDAO(JSONObject jsonFriend) throws JSONException {
+		FriendDAO friendDAO = new FriendDAO(getApplicationContext());
+		friendDAO.open();
+		friendDAO.save(new Friend(jsonFriend.getInt("id"), jsonFriend
+				.getString("username"), jsonFriend.getString("first_name"), "",
+				jsonFriend.getString("email"), false, false));
+		friendDAO.close();
+	}
+
+	private void addFriend(long id) throws JSONException {
+		JSONObject requestBody = FriendsRequest.getInstance()
+				.createFriendJsonObject(AuthUser.getId(), id, false, false);
+		FriendsRequest.getInstance().addFriend(getApplicationContext(),
+				requestBody, new Response.Listener<JSONObject>() {
+
+					@Override
+					public void onResponse(JSONObject response) {
+						MyLog.i(GcmIntentService.class,
+								"" + response.toString());
+					}
+				}, new Response.ErrorListener() {
+
+					@Override
+					public void onErrorResponse(VolleyError error) {
+						MyLog.e(GcmIntentService.class, "" + error.toString());
+					}
+				});
+	}
+
+	private void updateFriendsPhoto() {
+		FriendDAO friendDAO = new FriendDAO(getApplicationContext());
+		friendDAO.open();
+		List<Friend> friends = friendDAO.get();
+		for (Friend friend : friends) {
+			if (friend.getPhoto().isEmpty()) {
+				long id = friend.getId();
+				// Doing minus 2 cuz offset between user and detail
+				UserDetailRequest.getInstance().getUserDetail(
+						getApplicationContext(), (id - 2),
+						new Response.Listener<JSONObject>() {
+
+							@Override
+							public void onResponse(JSONObject response) {
+								if (response != null) {
+									try {
+										String loginType = response
+												.getString("login_type");
+										if (loginType.equals("facebook")) {
+											String thirdId = response
+													.getString("third_id");
+											FriendDAO ff = new FriendDAO(
+													getApplicationContext());
+											ff.open();
+											Friend f = ff.get(response
+													.getLong("user_id"));
+											f.setPhoto("http://graph.facebook.com/v2.1/"
+													+ thirdId
+													+ "/picture?type=large");
+											ff.update(f);
+											ff.close();
+										} else {
+											// TODO login type others
+										}
+									} catch (JSONException e) {
+										e.printStackTrace();
+									}
+								}
+							}
+						}, new Response.ErrorListener() {
+
+							@Override
+							public void onErrorResponse(VolleyError error) {
+								MyLog.e(SyncUserDataService.class,
+										"" + error.toString());
+							}
+						});
+			}
+		}
+		friendDAO.close();
+
+	}
+
+	@Override
+	protected void onHandleIntent(Intent intent) {
+		VolleyTaskManager.getInstance().init(getAssets());
+		if (intent.hasExtra("passby")) {
+			dataPassby = intent.getBundleExtra("passby");
+		}
+		if (intent.getAction().equals(SAVE_DATA)) {
+			Bundle data = intent.getBundleExtra(SYNC_DATA);
+			saveAuth(data.getString(SHARED_PREFERENCED_BASE),
+					data.getString(SHARED_PREFERENCED_TOKEN));
+			saveUserDetail(data.getInt(SHARED_PREFERENCED_ID),
+					data.getString(SHARED_PREFERENCED_USERNAME),
+					data.getString(SHARED_PREFERENCED_NAME),
+					data.getString(SHARED_PREFERENCED_EMAIL),
+					data.getString(SHARED_PREFERENCED_LOGIN_TYPE),
+					data.getString(SHARED_PREFERENCED_THIRD_ID),
+					data.getString(SHARED_PREFERENCED_GCM_ID));
+			try {
+				setFeedbackPointTable(data.getInt("id"));
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			if (!data.getString("friends").isEmpty()) {
+				try {
+					JSONArray friendArray = new JSONArray(
+							data.getString("friends"));
+					for (int i = 0; i < friendArray.length(); i++) {
+						JSONObject jsonFriend = friendArray.getJSONObject(i);
+						addFriend(jsonFriend.getInt("id"));
+						addFriendDAO(jsonFriend);
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+			syncUserPreference();
+		} else if (intent.getAction().equals(SYNC_DATA)) {
+			syncUserPreference();
+		}
+		SharedPreferences sharedPreferenced = getSharedPreferences(
+				SHARED_PREFERENCED_DB_NAME, Context.MODE_PRIVATE);
+		regid = getRegistrationId(SyncUserDataService.this,
+				sharedPreferenced.getInt(SHARED_PREFERENCED_ID, 0));
+		storeRegistrationId(SyncUserDataService.this, regid);
+		updateFriendsPhoto();
+	}
+
+}

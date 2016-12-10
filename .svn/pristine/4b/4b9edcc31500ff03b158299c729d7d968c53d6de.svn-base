@@ -1,0 +1,13 @@
+package edu.utboy.biteit.utils;
+
+public class AuthToken {
+	public static String accessToken = "";
+
+	public static void saveToken(String token) {
+		accessToken = token;
+	}
+
+	public static String getAuthToken() {
+		return accessToken;
+	}
+}

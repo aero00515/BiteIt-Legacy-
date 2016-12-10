@@ -1,0 +1,53 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f9e5d6"
+    android:orientation="vertical"
+    tools:context="edu.utboy.biteit.NavigationDrawerFragment" >
+
+    <!-- #ccf98d73 -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="4" >
+
+        <ImageView
+            android:id="@+id/fragment_navi_profile_pic"
+            android:layout_width="@dimen/frg_navi_image_width"
+            android:layout_height="@dimen/frg_navi_image_height"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:background="#F9E5D6"
+            android:contentDescription="@string/activity_store_info_feedback_photo_description"
+            android:cropToPadding="true"
+            android:padding="@dimen/frg_navi_image_padding"
+            android:scaleType="centerInside"
+            android:src="@drawable/com_facebook_profile_default_icon" />
+
+        <TextView
+            android:id="@+id/fragment_navi_profile_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:layout_gravity="center_vertical"
+            android:textSize="@dimen/frg_navi_name_size"
+            android:text="@string/app_name"
+            android:shadowDx="2"
+            android:shadowDy="2"
+            android:shadowRadius="4"
+            android:shadowColor="#666666"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+    </LinearLayout>
+
+    <ExpandableListView
+        android:id="@+id/fragment_navi_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/activity_horizontal_padding"
+        android:layout_weight="1"
+        android:groupIndicator="@null"
+        android:scrollbars="none" >
+    </ExpandableListView>
+
+</LinearLayout>

@@ -1,0 +1,329 @@
+package edu.utboy.biteit.ui;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBarActivity;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.RatingBar;
+import android.widget.TextView;
+
+import com.viewpagerindicator.CirclePageIndicator;
+
+import edu.utboy.biteit.R;
+import edu.utboy.biteit.asynctasks.VolleyTaskManager;
+import edu.utboy.biteit.models.PhotoComment;
+import edu.utboy.biteit.models.StoreInfo;
+import edu.utboy.biteit.models.dao.PhotoCommentDAO;
+import edu.utboy.biteit.models.dao.StoreInfoDAO;
+import edu.utboy.biteit.ui.adapters.StoreInfoPicAdapter;
+import edu.utboy.biteit.ui.pages.StoreInfoPicFragment;
+
+public class StoreInfoActivity extends ActionBarActivity {
+
+	public static final String STORE_ID_TAG = "store_id_tag";
+
+	@Deprecated
+	public static final String STORE_INFO_TAG = "store_info_tag";
+	@Deprecated
+	public static final String STORE_PHOTO_COMMENT_TAG = "store_photo_comment_tag";
+
+	private static final int STORE_INFO_FEEDBACK_RESULT = 1;
+	private static final int STORE_INFO_TAKE_PICTURE_RESULT = 2;
+
+	// private static final int STATE_ONSCREEN = 0;
+	// private static final int STATE_OFFSCREEN = 1;
+	// private static final int STATE_RETURNING = 2;
+
+	private StoreInfo storeInfo;
+	private List<PhotoComment> photoComments;
+
+	private ViewPager picPager;
+	private CirclePageIndicator cpi;
+	private StoreInfoPicAdapter mStoreInfoPicAdapter;
+	private List<Fragment> storeInfoPicFragments;
+	private RatingBar ratingClean;
+	private RatingBar ratingService;
+	private RatingBar ratingAtmos;
+	private RatingBar ratingFavor;
+	private RatingBar ratingUnknow;
+	private TextView storeInfoTotalRate;
+	private TextView storeInfoAddress;
+	private TextView storeInfoPhone;
+	private StoreInfoDAO storeInfoDAO;
+	private PhotoCommentDAO photoCommentDAO;
+	private long storeId;
+
+	// private View mStickyView;
+	// private View mPlaceholderView;
+	// private ObservableScrollView mObservableScrollView;
+	// private ScrollSettleHandler mScrollSettleHandler = new
+	// ScrollSettleHandler();
+
+	// private int mMinRawY = 0;
+	// private int mState = STATE_ONSCREEN;
+	// private int mQuickReturnHeight;
+	// private int mMaxScrollY;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		storeInfoDAO = new StoreInfoDAO(this);
+		photoCommentDAO = new PhotoCommentDAO(this);
+		setContentView(R.layout.activity_store_info);
+		picPager = (ViewPager) findViewById(R.id.activity_store_info_pic_pager);
+		cpi = (CirclePageIndicator) findViewById(R.id.indicator);
+		ratingClean = (RatingBar) findViewById(R.id.activity_store_info_clean_rating);
+		ratingService = (RatingBar) findViewById(R.id.activity_store_info_service_rating);
+		ratingAtmos = (RatingBar) findViewById(R.id.activity_store_info_atmos_rating);
+		ratingFavor = (RatingBar) findViewById(R.id.activity_store_info_flavor_rating);
+		ratingUnknow = (RatingBar) findViewById(R.id.activity_store_info_unknow_rating);
+		storeInfoTotalRate = (TextView) findViewById(R.id.activity_store_info_total_rating);
+		storeInfoAddress = (TextView) findViewById(R.id.activity_store_info_address);
+		storeInfoPhone = (TextView) findViewById(R.id.activity_store_info_phone);
+
+		assert getActionBar() != null;
+		getActionBar().setDisplayHomeAsUpEnabled(true);
+
+		storeInfoDAO.open();
+		photoCommentDAO.open();
+
+		// The view holder's setting
+		// mObservableScrollView = (ObservableScrollView)
+		// findViewById(R.id.activity_store_info_scroll_view);
+		// mStickyView = findViewById(R.id.activity_store_info_function);
+		// mPlaceholderView =
+		// findViewById(R.id.activity_store_info_placeholder);
+
+		storeInfoPicFragments = new ArrayList<Fragment>();
+		mStoreInfoPicAdapter = new StoreInfoPicAdapter(
+				getSupportFragmentManager(), storeInfoPicFragments);
+		picPager.setAdapter(mStoreInfoPicAdapter);
+		cpi.setViewPager(picPager);
+
+		storeId = getIntent().getLongExtra(STORE_ID_TAG, 0);
+		// initObservableScrollView();
+		initStoreInfo(storeId);
+
+		// function3 = (Button)
+		// findViewById(R.id.activity_store_info_function_btn3);
+		// function3.setOnClickListener(new OnClickListener() {
+		//
+		// @Override
+		// public void onClick(View v) {
+		// function3.setClickable(false);
+		// Intent intent = new Intent();
+		// intent.setClass(StoreInfoActivity.this,
+		// StoreInfoFeedbackActivity.class);
+		// intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+		// startActivityForResult(intent, STORE_INFO_FEEDBACK_RESULT);
+		// overridePendingTransition(R.anim.abc_fade_in,
+		// R.anim.abc_fade_out);
+		// }
+		// });
+	}
+
+	/*
+	 * private void initObservableScrollView() {
+	 * mObservableScrollView.setCallbacks(mObservableScrollViewCallbacks);
+	 * mObservableScrollView.getViewTreeObserver().addOnGlobalLayoutListener(
+	 * new ViewTreeObserver.OnGlobalLayoutListener() {
+	 * 
+	 * @Override public void onGlobalLayout() { mObservableScrollViewCallbacks
+	 * .onScrollChanged(mObservableScrollView .getScrollY()); mMaxScrollY =
+	 * mObservableScrollView .computeVerticalScrollRange() -
+	 * mObservableScrollView.getHeight(); mQuickReturnHeight =
+	 * mStickyView.getHeight(); } }); }
+	 */
+
+	private void initStoreInfo(long storeId) {
+		// Get StoreInfo pass from MainActivity
+		if (storeId != 0) {
+			// has store
+			storeInfo = storeInfoDAO.getStoreInfo(storeId);
+			photoComments = photoCommentDAO.getStorePhotoComments(storeId);
+			float ratingAtmos = storeInfo.getRatingAtmos();
+			float ratingClean = storeInfo.getRatingClean();
+			float ratingFlavor = storeInfo.getRatingFlavor();
+			float ratingService = storeInfo.getRatingService();
+			float ratingUnknow = storeInfo.getRatingUnkonw();
+			float total = (ratingAtmos + ratingClean + ratingFlavor
+					+ ratingService + ratingUnknow) / 5;
+			this.ratingClean.setRating(ratingClean);
+			this.ratingService.setRating(ratingService);
+			this.ratingAtmos.setRating(ratingAtmos);
+			this.ratingFavor.setRating(ratingFlavor);
+			this.ratingUnknow.setRating(ratingUnknow);
+			storeInfoTotalRate.setText(String.valueOf(total));
+			storeInfoAddress.setText(storeInfo.getAddress());
+			storeInfoPhone.setText(storeInfo.getPhone());
+			getAllData();
+			mStoreInfoPicAdapter.notifyDataSetChanged();
+		} else {
+			// TODO: Fatal error for no store
+			MyLog.e(StoreInfoActivity.class, "[Fatal Error] No Store");
+		}
+	}
+
+	private void getAllData() {
+		for (PhotoComment photoComment : photoComments) {
+			Bundle data = new Bundle();
+			data.putString(StoreInfoPicFragment.STORE_INFO_PIC_URI,
+					VolleyTaskManager.getInstance().getMediaRoot()
+							+ photoComment.getUri().toString());
+			data.putString(StoreInfoPicFragment.STORE_INFO_PIC_COMMENT,
+					photoComment.getComment());
+			Fragment fragment = new StoreInfoPicFragment();
+			fragment.setArguments(data);
+			storeInfoPicFragments.add(fragment);
+		}
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.store_info, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		switch (item.getItemId()) {
+		case R.id.action_take_picture:
+			Intent intentTakePicture = new Intent();
+			intentTakePicture.setClass(StoreInfoActivity.this,
+					StoreInfoTakePictureActivity.class);
+			intentTakePicture.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+			intentTakePicture.putExtra(STORE_ID_TAG, storeId);
+			startActivityForResult(intentTakePicture,
+					STORE_INFO_TAKE_PICTURE_RESULT);
+			overridePendingTransition(R.anim.abc_fade_in, R.anim.abc_fade_out);
+			return true;
+		case R.id.action_feedback:
+			Intent intent = new Intent();
+			intent.setClass(StoreInfoActivity.this,
+					StoreInfoFeedbackActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+			intent.putExtra(STORE_ID_TAG, storeId);
+			startActivityForResult(intent, STORE_INFO_FEEDBACK_RESULT);
+			overridePendingTransition(R.anim.abc_fade_in, R.anim.abc_fade_out);
+			return true;
+		case R.id.action_focused:
+			return true;
+		case R.id.action_blocked:
+			return true;
+		case android.R.id.home:
+			finish();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+
+	}
+
+	@Override
+	protected void onDestroy() {
+		storeInfoDAO.close();
+		photoCommentDAO.close();
+		super.onDestroy();
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		switch (requestCode) {
+		case STORE_INFO_FEEDBACK_RESULT:
+			break;
+		case STORE_INFO_TAKE_PICTURE_RESULT:
+			if (resultCode == RESULT_OK) {
+				String[] photoCommentData = data
+						.getStringArrayExtra(StoreInfoTakePictureActivity.STORE_INFO_FEEDBACK_PHOTO_COMMENT);
+				for (String photo : photoCommentData) {
+					try {
+						JSONObject photoJson = new JSONObject(photo);
+						MyLog.d(StoreInfoActivity.class, photoJson.toString());
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	/*
+	 * private ObservableScrollView.Callbacks mObservableScrollViewCallbacks =
+	 * new ObservableScrollView.Callbacks() {
+	 * 
+	 * @Override public void onScrollChanged(int scrollY) { scrollY =
+	 * Math.min(mMaxScrollY, scrollY); mScrollSettleHandler.onScroll(scrollY);
+	 * int rawY = mPlaceholderView.getTop() - scrollY; int translationY = 0;
+	 * 
+	 * switch (mState) { case STATE_OFFSCREEN: if (rawY <= mMinRawY) { mMinRawY
+	 * = rawY; } else { mState = STATE_RETURNING; } translationY = rawY; break;
+	 * 
+	 * case STATE_ONSCREEN: if (rawY < -mQuickReturnHeight) { mState =
+	 * STATE_OFFSCREEN; mMinRawY = rawY; } translationY = rawY; break;
+	 * 
+	 * case STATE_RETURNING: translationY = (rawY - mMinRawY) -
+	 * mQuickReturnHeight; if (translationY > 0) { translationY = 0; mMinRawY =
+	 * rawY - mQuickReturnHeight; }
+	 * 
+	 * if (rawY > 0) { mState = STATE_ONSCREEN; translationY = rawY; }
+	 * 
+	 * if (translationY < -mQuickReturnHeight) { mState = STATE_OFFSCREEN;
+	 * mMinRawY = rawY; } break; } mStickyView.animate().cancel();
+	 * mStickyView.setTranslationY(translationY + scrollY); }
+	 * 
+	 * @Override public void onDownMotionEvent() {
+	 * mScrollSettleHandler.setSettleEnabled(false); }
+	 * 
+	 * @Override public void onUpOrCancelMotionEvent() {
+	 * mScrollSettleHandler.setSettleEnabled(true);
+	 * mScrollSettleHandler.onScroll(mObservableScrollView.getScrollY()); } };
+	 * 
+	 * private class ScrollSettleHandler extends HandlerCallBack { private
+	 * static final int SETTLE_DELAY_MILLIS = 100;
+	 * 
+	 * private int mSettledScrollY = Integer.MIN_VALUE; private boolean
+	 * mSettleEnabled;
+	 * 
+	 * public void onScroll(int scrollY) { if (mSettledScrollY != scrollY) { //
+	 * Clear any pending messages and post delayed
+	 * dataHandler.removeMessages(0); dataHandler.sendEmptyMessageDelayed(0,
+	 * SETTLE_DELAY_MILLIS); mSettledScrollY = scrollY; } }
+	 * 
+	 * public void setSettleEnabled(boolean settleEnabled) { mSettleEnabled =
+	 * settleEnabled; }
+	 * 
+	 * @Override public void handleDataMessage(Message msg) { // Handle the
+	 * scroll settling. if (STATE_RETURNING == mState && mSettleEnabled) { int
+	 * mDestTranslationY; if (mSettledScrollY - mStickyView.getTranslationY() >
+	 * mQuickReturnHeight / 2) { mState = STATE_OFFSCREEN; mDestTranslationY =
+	 * Math.max(mSettledScrollY - mQuickReturnHeight,
+	 * mPlaceholderView.getTop()); } else { mDestTranslationY = mSettledScrollY;
+	 * }
+	 * 
+	 * mMinRawY = mPlaceholderView.getTop() - mQuickReturnHeight -
+	 * mDestTranslationY; mStickyView.animate().translationY(mDestTranslationY);
+	 * } mSettledScrollY = Integer.MIN_VALUE; // reset
+	 * 
+	 * } }
+	 */
+
+}

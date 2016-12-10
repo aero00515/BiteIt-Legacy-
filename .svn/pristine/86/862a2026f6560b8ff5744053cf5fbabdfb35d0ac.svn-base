@@ -1,0 +1,111 @@
+<!-- 
+	res/values/dimens.xml
+	use normal(at least 320x470 dp) hdpi(240)
+ -->
+<resources>
+    
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">14dp</dimen>
+    <dimen name="activity_vertical_margin">14dp</dimen>
+    <dimen name="activity_horizontal_padding">6dp</dimen>
+    <dimen name="activity_vertical_padding">6dp</dimen>
+    <dimen name="sticky_height">36dp</dimen>
+    <dimen name="page_margin">14dp</dimen> 
+    <dimen name="tutorial_try_title_size">36sp</dimen>
+
+    <!--
+         Per the design guidelines, navigation drawers should be between 240dp and 320dp:
+         https://developer.android.com/design/patterns/navigation-drawer.html
+    -->
+    <dimen name="navigation_drawer_width">250dp</dimen>
+    
+    <dimen name="store_info_pic_min_height">260dp</dimen>
+    <dimen name="feedback_pager_indicator_stroke_width">5dp</dimen>
+    <dimen name="feedback_pager_indicator_line_width">36dp</dimen>
+    
+    <!-- style, custom rating bar's height -->
+    <dimen name="rating_margin">8dp</dimen>
+    
+    <!-- activity_achievements -->
+    <!--  
+    	<dimen name="achievements_barchat_height">9999dp</dimen>
+    	<dimen name="achievements_list_padding">9999dp</dimen>
+    	<dimen name="achievements_imageview_height_width">9999dp</dimen>
+    	<dimen name="achievements_textview">9999dp</dimen>	-->
+
+	<!-- activity_expandablelistitem  -->
+  	<!-- activity_foundnewstore -->
+	<!-- activity_friends -->
+	<!-- activity_logo -->
+	<!--
+		<dimen name="logo_imageview_width_height">9999dp</dimen> -->
+	<!-- activity_main -->
+	<dimen name="viewpager_padding_top">10dp</dimen>
+	
+	<!-- activity_mylist -->
+	<!-- activity_plus client -->
+	<!-- activity_stickylist headers -->
+	<!-- activity_store info feedback -->
+	<dimen name="close_margin">3dp</dimen>
+    <dimen name="close_height">40dp</dimen>
+    <dimen name="apply_height">40dp</dimen>
+	<dimen name="indicator_padding">3dp</dimen>
+    
+	<!-- activity_store info -->
+	<!-- activity_store list -->
+	<!-- activity_toturial -->
+	<!-- added_photo_listview_style -->
+	<!-- drawer_event detail -->
+	<dimen name="crown_square">16dp</dimen>
+	
+	<!-- drawer_list -->
+	<dimen name="list_maxHeight">74dp</dimen>
+	<dimen name="list_margin">6dp</dimen>
+	
+	<!-- frg_friends info -->
+	<!-- frg_main -->
+	<!-- frg_multi -->
+	<!-- frg_navigation drawer -->
+	<dimen name="frg_navi_image_padding">2dp</dimen>
+	<dimen name="frg_navi_image_width">84dp</dimen>
+	<dimen name="frg_navi_image_height">84dp</dimen>
+	<dimen name="frg_navi_name_size">16sp</dimen>
+		
+	<!-- frg_photo comment -->
+	<!-- frg_rating -->
+	<!-- frg_slideshow image -->	
+	<!-- frg_sticky return -->
+	<!-- frg_store info -->
+	<dimen name="rating_height">22dp</dimen>
+	
+	<!-- frg_student id -->
+	<!-- frg_tutorial -->
+	<!-- frg_video record -->
+	
+	<!-- friend_title -->
+	<dimen name="friend_title_user_imageview_width">94dp</dimen>
+	<dimen name="friend_title_user_imageview_height">94dp</dimen>
+	<dimen name="friend_title_icon_imageview_width">25dp</dimen>
+	<dimen name="friend_title_icon_imageview_height">25dp</dimen>
+	<dimen name="friend_title_name_size">16sp</dimen>
+	
+	<!-- list_header -->
+	<dimen name="list_header_min_height">35dp</dimen>
+	<dimen name="list_header_padding">7dp</dimen>
+	<!-- list_row -->
+	
+	<!-- store_list_style -->
+	<dimen name="store_list_style_imageview_height">155dp</dimen>
+	<dimen name="store_list_style_name_size">20sp</dimen>
+	
+	<!-- undo_row -->
+	<dimen name="undo_row_textview_width">0dp</dimen>
+	<dimen name="undo_row_textview_padding">10dp</dimen>
+	<dimen name="undo_row_textview_textsize">16sp</dimen>
+	<dimen name="undo_row_view_width">1px</dimen>
+	<dimen name="undo_row_view_margin">10dp</dimen>
+	<dimen name="undo_row_button_width">0dp</dimen>
+	<dimen name="undo_row_button_padding">8dp</dimen>
+	<dimen name="undo_row_button_padding_left_right">8dp</dimen>
+	<dimen name="undo_row_button_textsize">16dp</dimen>
+</resources>

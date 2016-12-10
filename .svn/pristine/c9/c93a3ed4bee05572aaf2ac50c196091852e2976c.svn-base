@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">BiteIt</string>
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_example">Example action</string>
+    <string name="action_settings">Settings</string>
+    <string name="fragment_store_info_pic_description">Store Pictures</string>
+    <string name="activity_store_info_total_rating">4.9</string>
+    <string name="activity_store_info_rating">The rating of this store</string>
+    <string name="activity_store_info_clean">Clean</string>
+    <string name="activity_store_info_service">Service</string>
+    <string name="activity_store_info_price">Price</string>
+    <string name="activity_store_info_favor">Favor</string>
+    <string name="activity_store_info_unknow">Unknow</string>
+    <string name="activity_store_info_feedback_close_description">close</string>
+    <string name="activity_store_info_feedback_apply_description">apply</string>
+    <string name="activity_store_info_feedback_photo_description">photo</string>
+    <string name="activity_store_info_feedback_comment_description">comment</string>
+
+</resources>

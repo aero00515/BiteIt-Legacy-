@@ -1,0 +1,49 @@
+package edu.utboy.biteit.db;
+
+public interface DbConstants extends idv.andylin.tw.andyandroidlibs.DbConstants {
+
+	@Table
+	public static final String TABLE_PHOTO_COMMENT = "table_photo_comment";
+
+	@Table
+	public static final String TABLE_STORE_INFO = "table_store_info";
+
+	@Table
+	public static final String TABLE_FRIENDS = "table_friends";
+	
+	@Table
+	public static final String TABLE_FEEDBACK_POINT = "table_feedback_point";
+
+	public static final String STORE_ID = "store_id";
+	public static final String URI = "uri";
+	public static final String COMMENT = "comment";
+
+	public static final String GOOGLE_STORE_ID = "google_store_id";
+	public static final String NAME = "name";
+	public static final String ADDRESS = "address";
+	public static final String PHONE = "phone";
+	public static final String LONGTITUDE = "longtitude";
+	public static final String LATITUDE = "latitude";
+	public static final String FIRST_LEVEL = "first_level";
+	public static final String THIRD_LEVEL = "third_level";
+	public static final String RATING_CLEAN = "rating_clean";
+	public static final String RATING_SERVICE = "rating_service";
+	public static final String RATING_PRICE = "rating_price";
+	public static final String RATING_FAVOR = "rating_favor";
+	public static final String RATING_UNKNOW = "rating_unknow";
+	public static final String TAGS = "tags";
+	
+	public static final String NEW_STORE = "new_store";
+	public static final String FILL_EMPTY = "fill_empty";
+	public static final String REPORT_ERROR = "report_error";
+	public static final String RATING_FEEDBACK = "rating_feedback";
+	public static final String PHOTO_FEEDBACK = "photo_feedback";
+	public static final String COMMENT_FEEDBACK = "comment_feedback";
+
+	public static final String IS_BLOCKED = "is_blocked";
+
+	public static final String USERNAME = "username";
+	public static final String EMAIL = "email";
+	public static final String IS_FOCUSED = "is_focused";
+
+}

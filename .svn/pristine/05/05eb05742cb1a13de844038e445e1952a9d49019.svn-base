@@ -1,0 +1,44 @@
+package edu.utboy.biteit.models;
+
+import com.google.android.gms.maps.model.LatLng;
+
+public class MarkerItem {
+
+	private double lat;
+	private double lng;
+	private boolean isInBounds;
+
+	public MarkerItem(double lat, double lng) {
+		this.lat = lat;
+		this.lng = lng;
+		isInBounds = false;
+	}
+
+	public double getLat() {
+		return lat;
+	}
+
+	public void setLat(double lat) {
+		this.lat = lat;
+	}
+
+	public double getLng() {
+		return lng;
+	}
+
+	public void setLng(double lng) {
+		this.lng = lng;
+	}
+
+	public boolean isInBounds() {
+		return isInBounds;
+	}
+
+	public void setInBounds(boolean isInBounds) {
+		this.isInBounds = isInBounds;
+	}
+
+	public LatLng getLatlng() {
+		return new LatLng(lat, lng);
+	}
+}

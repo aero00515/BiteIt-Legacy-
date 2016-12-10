@@ -1,0 +1,195 @@
+package edu.utboy.biteit;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+import android.app.IntentService;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Bundle;
+import android.util.Base64;
+import edu.utboy.biteit.utils.AuthToken;
+
+public class SyncUserDataService extends IntentService {
+
+	public SyncUserDataService(String name) {
+		super(name);
+	}
+
+	public static final String SYNC_ACTION = "SyncUserDataService";
+	public static final String SAVE_DATA = "save_data";
+	public static final String SYNC_DATA = "sync_data";
+	public static final String SHARED_PREFERENCED_DB_NAME = "bite.it.sp";
+	public static final String SHARED_PREFERENCED_BASE = "sp_base";
+	public static final String SHARED_PREFERENCED_TOKEN = "sp_token";
+
+	public static final String SHARED_PREFERENCED_ID = "sp_id";
+	public static final String SHARED_PREFERENCED_USERNAME = "sp_username";
+	public static final String SHARED_PREFERENCED_NAME = "sp_name";
+	public static final String SHARED_PREFERENCED_EMAIL = "sp_email";
+	public static final String SHARED_PREFERENCED_LOGIN_TYPE = "sp_login_type";
+	public static final String SHARED_PREFERENCED_THIRD_ID = "sp_third_id";
+	public static final String SHARED_PREFERENCED_GCM_ID = "sp_gcm_id";
+
+	public static final String EXTRA_MESSAGE = "message";
+	public static final String PROPERTY_REG_ID = "registration_id";
+	private static final String PROPERTY_APP_VERSION = "appVersion";
+
+	private String regid;
+
+	private void saveUserDetail(int id, String username, String name,
+			String email, String loginType, String thirdId, String gcmId) {
+		SharedPreferences.Editor spe = getSharedPreferences(
+				SHARED_PREFERENCED_DB_NAME, MODE_PRIVATE).edit();
+		spe.putInt(SHARED_PREFERENCED_ID, id);
+		spe.putString(SHARED_PREFERENCED_USERNAME, username);
+		spe.putString(SHARED_PREFERENCED_NAME, name);
+		spe.putString(SHARED_PREFERENCED_EMAIL, email);
+		spe.putString(SHARED_PREFERENCED_LOGIN_TYPE, loginType);
+		spe.putString(SHARED_PREFERENCED_THIRD_ID, thirdId);
+		spe.putString(SHARED_PREFERENCED_GCM_ID, gcmId);
+		AuthToken.saveGCMId(gcmId);
+		spe.commit();
+	}
+
+	private void saveAuth(String userpass, String token) {
+		SharedPreferences.Editor spe = getSharedPreferences(
+				SHARED_PREFERENCED_DB_NAME, MODE_PRIVATE).edit();
+		spe.putString(SHARED_PREFERENCED_BASE,
+				Base64.encodeToString(userpass.getBytes(), Base64.DEFAULT));
+		spe.putString(SHARED_PREFERENCED_TOKEN, token);
+		AuthToken.saveToken(token);
+		spe.commit();
+	}
+
+	private void syncUserPreference() {
+		Intent intent = new Intent();
+		intent.setAction(SYNC_ACTION);
+		Bundle data = new Bundle();
+		SharedPreferences sharedPreferenced = getSharedPreferences(
+				SHARED_PREFERENCED_DB_NAME, Context.MODE_PRIVATE);
+		data.putString(SHARED_PREFERENCED_BASE,
+				sharedPreferenced.getString(SHARED_PREFERENCED_BASE, ""));
+		data.putString(SHARED_PREFERENCED_TOKEN,
+				sharedPreferenced.getString(SHARED_PREFERENCED_TOKEN, ""));
+		data.putString(SHARED_PREFERENCED_ID,
+				sharedPreferenced.getString(SHARED_PREFERENCED_ID, ""));
+		data.putString(SHARED_PREFERENCED_USERNAME,
+				sharedPreferenced.getString(SHARED_PREFERENCED_USERNAME, ""));
+		data.putString(SHARED_PREFERENCED_NAME,
+				sharedPreferenced.getString(SHARED_PREFERENCED_NAME, ""));
+		data.putString(SHARED_PREFERENCED_EMAIL,
+				sharedPreferenced.getString(SHARED_PREFERENCED_EMAIL, ""));
+		data.putString(SHARED_PREFERENCED_LOGIN_TYPE,
+				sharedPreferenced.getString(SHARED_PREFERENCED_LOGIN_TYPE, ""));
+		data.putString(SHARED_PREFERENCED_THIRD_ID,
+				sharedPreferenced.getString(SHARED_PREFERENCED_THIRD_ID, ""));
+		data.putString(SHARED_PREFERENCED_GCM_ID,
+				sharedPreferenced.getString(SHARED_PREFERENCED_GCM_ID, ""));
+		AuthToken.saveGCMId(sharedPreferenced.getString(
+				SHARED_PREFERENCED_GCM_ID, ""));
+		AuthToken.saveToken(sharedPreferenced.getString(
+				SHARED_PREFERENCED_TOKEN, ""));
+		intent.putExtra(SYNC_DATA, data);
+		sendBroadcast(intent);
+	}
+
+	/**
+	 * Stores the registration ID and app versionCode in the application's
+	 * {@code SharedPreferences}.
+	 *
+	 * @param context
+	 *            application's context.
+	 * @param regId
+	 *            registration ID
+	 */
+	private void storeRegistrationId(Context context, String regId) {
+		final SharedPreferences prefs = getGCMPreferences(context);
+		int appVersion = getAppVersion(context);
+		MyLog.i(TutorialActivity.class, "Saving regId on app version "
+				+ appVersion);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putString(PROPERTY_REG_ID, regId);
+		editor.putInt(PROPERTY_APP_VERSION, appVersion);
+		editor.commit();
+	}
+
+	/**
+	 * @return Application's version code from the {@code PackageManager}.
+	 */
+	private static int getAppVersion(Context context) {
+		try {
+			PackageInfo packageInfo = context.getPackageManager()
+					.getPackageInfo(context.getPackageName(), 0);
+			return packageInfo.versionCode;
+		} catch (NameNotFoundException e) {
+			// should never happen
+			throw new RuntimeException("Could not get package name: " + e);
+		}
+	}
+
+	/**
+	 * @return Application's {@code SharedPreferences}.
+	 */
+	private SharedPreferences getGCMPreferences(Context context) {
+		// This sample app persists the registration ID in shared preferences,
+		// but
+		// how you store the regID in your app is up to you.
+		return getSharedPreferences(TutorialActivity.class.getSimpleName(),
+				Context.MODE_PRIVATE);
+	}
+
+	/**
+	 * Gets the current registration ID for application on GCM service.
+	 * <p>
+	 * If result is empty, the app needs to register.
+	 *
+	 * @return registration ID, or empty string if there is no existing
+	 *         registration ID.
+	 */
+	private String getRegistrationId(Context context) {
+		final SharedPreferences prefs = getGCMPreferences(context);
+		String registrationId = prefs.getString(PROPERTY_REG_ID, "");
+		if (registrationId.isEmpty()) {
+			MyLog.i(TutorialActivity.class, "Registration not found.");
+			return "";
+		}
+		// Check if app was updated; if so, it must clear the registration ID
+		// since the existing regID is not guaranteed to work with the new
+		// app version.
+		int registeredVersion = prefs.getInt(PROPERTY_APP_VERSION,
+				Integer.MIN_VALUE);
+		int currentVersion = getAppVersion(context);
+		if (registeredVersion != currentVersion) {
+			MyLog.i(TutorialActivity.class, "App version changed.");
+			return "";
+		}
+		return registrationId;
+	}
+
+	public interface OnFinishListener {
+		public void onFinish(Bundle data);
+	}
+
+	@Override
+	protected void onHandleIntent(Intent intent) {
+		if (intent.getAction().equals(SAVE_DATA)) {
+			Bundle data = intent.getBundleExtra(SYNC_DATA);
+			saveAuth(data.getString(SHARED_PREFERENCED_BASE),
+					data.getString(SHARED_PREFERENCED_TOKEN));
+			saveUserDetail(data.getInt(SHARED_PREFERENCED_ID),
+					data.getString(SHARED_PREFERENCED_USERNAME),
+					data.getString(SHARED_PREFERENCED_NAME),
+					data.getString(SHARED_PREFERENCED_EMAIL),
+					data.getString(SHARED_PREFERENCED_LOGIN_TYPE),
+					data.getString(SHARED_PREFERENCED_THIRD_ID),
+					data.getString(SHARED_PREFERENCED_GCM_ID));
+		} else if (intent.getAction().equals(SYNC_DATA)) {
+			syncUserPreference();
+		}
+		regid = getRegistrationId(SyncUserDataService.this);
+		storeRegistrationId(SyncUserDataService.this, regid);
+	}
+
+}

@@ -1,0 +1,18 @@
+# This properties is for our server's info
+# The structure of our service is based on RESTful
+
+hostname = 163.21.245.120
+media_root=http://163.21.245.120:8000/api-biteit/static/
+port = 8000
+format = json
+apiRoot = api-biteit
+apiNewAccount = api/accounts
+apiAuth = api/auth
+apiAccount = account
+apiUserDetail = api/userdetail
+apiStoreInfo = storeinfo
+apiStorePhotoComment = storephotocomment
+apiPhotoComment = photocomment
+apiFriend = friend
+apiFeedbackPoint = feedbackpoint
+apiVerifyUser = verifyuser

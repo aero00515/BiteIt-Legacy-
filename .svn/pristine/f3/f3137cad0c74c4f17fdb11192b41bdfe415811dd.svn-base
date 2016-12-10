@@ -1,0 +1,251 @@
+package edu.utboy.biteit.models;
+
+import android.os.Bundle;
+
+import com.google.gson.Gson;
+
+public class StoreInfo {
+
+	public final static String ID = "store_info_id";
+	public final static String STORE_ID = "store_info_store_id";
+	public final static String GOOGLE_STORE_ID = "store_info_google_store_id";
+	public final static String NAME = "store_info_name";
+	public final static String ADDRESS = "store_info_address";
+	public final static String PHONE = "store_info_phone";
+	public final static String LONGTITUDE = "store_info_longtitude";
+	public final static String LATITUDE = "store_info_latitude";
+	public final static String FIRST_LEVEL = "store_info_first_level";
+	public final static String THIRD_LEVEL = "store_info_third_level";
+	public final static String RATING_CLEAN = "store_info_rating_clean";
+	public final static String RATING_SERVICE = "store_info_rating_service";
+	public final static String RATING_PRICE = "store_info_rating_price";
+	public final static String RATING_FAVOR = "store_info_rating_flavor";
+	public final static String RATING_UNKNOW = "store_info_rating_unknow";
+	public final static String IS_BLOCKED = "store_info_is_blocked";
+	public final static String TAGS = "store_info_tags";
+
+	private long id;
+	private long storeId;
+	private String googleStoreId;
+	private String name;
+	private String address;
+	private String phone;
+	private double longtitude;
+	private double latitude;
+	private String firstLevel;
+	private String thirdLevel;
+	private float ratingClean;
+	private float ratingService;
+	private float ratingPrice;
+	private float ratingFavor;
+	private float ratingUnkonw;
+	private boolean isBlocked;
+	private String[] tags;
+
+	public StoreInfo(Bundle data) {
+		this.id = data.getLong(ID);
+		this.storeId = data.getLong(STORE_ID);
+		this.googleStoreId = data.getString(GOOGLE_STORE_ID);
+		this.name = data.getString(NAME);
+		this.address = data.getString(ADDRESS);
+		this.phone = data.getString(PHONE);
+		this.longtitude = data.getDouble(LONGTITUDE);
+		this.latitude = data.getDouble(LATITUDE);
+		this.firstLevel = data.getString(FIRST_LEVEL);
+		this.thirdLevel = data.getString(THIRD_LEVEL);
+		this.ratingClean = data.getFloat(RATING_CLEAN);
+		this.ratingService = data.getFloat(RATING_SERVICE);
+		this.ratingPrice = data.getFloat(RATING_PRICE);
+		this.ratingFavor = data.getFloat(RATING_FAVOR);
+		this.ratingUnkonw = data.getFloat(RATING_UNKNOW);
+		this.isBlocked = data.getBoolean(IS_BLOCKED);
+		this.tags = data.getStringArray(TAGS);
+	}
+
+	public StoreInfo(long id, long storeId, String googleStoreId, String name,
+			String address, String phone, double longtitude, double latitude,
+			String firstLevel, String thirdLevel, float ratingClean,
+			float ratingService, float ratingPrice, float ratingFavor,
+			float ratingUnknow, boolean isBlocked, String[] tags) {
+		this.id = id;
+		this.storeId = storeId;
+		this.googleStoreId = googleStoreId;
+		this.name = name;
+		this.address = address;
+		this.phone = phone;
+		this.longtitude = longtitude;
+		this.latitude = latitude;
+		this.firstLevel = firstLevel;
+		this.thirdLevel = thirdLevel;
+		this.ratingClean = ratingClean;
+		this.ratingService = ratingService;
+		this.ratingPrice = ratingPrice;
+		this.ratingFavor = ratingFavor;
+		this.ratingUnkonw = ratingUnknow;
+		this.isBlocked = isBlocked;
+		this.tags = tags;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public long getStoreId() {
+		return storeId;
+	}
+
+	public void setStoreId(long storeId) {
+		this.storeId = storeId;
+	}
+
+	public String getGoogleStoreId() {
+		return googleStoreId;
+	}
+
+	public void setGoogleStoreId(String googleStoreId) {
+		this.googleStoreId = googleStoreId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public double getLongtitude() {
+		return longtitude;
+	}
+
+	public void setLongtitude(double longtitude) {
+		this.longtitude = longtitude;
+	}
+
+	public double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
+
+	public String getFirstLevel() {
+		return firstLevel;
+	}
+
+	public void setFirstLevel(String firstLevel) {
+		this.firstLevel = firstLevel;
+	}
+
+	public String getThirdLevel() {
+		return thirdLevel;
+	}
+
+	public void setThirdLevel(String thirdLevel) {
+		this.thirdLevel = thirdLevel;
+	}
+
+	public float getRatingClean() {
+		return ratingClean;
+	}
+
+	public void setRatingClean(float ratingClean) {
+		this.ratingClean = ratingClean;
+	}
+
+	public float getRatingService() {
+		return ratingService;
+	}
+
+	public void setRatingService(float ratingService) {
+		this.ratingService = ratingService;
+	}
+
+	public float getRatingPrice() {
+		return ratingPrice;
+	}
+
+	public void setRatingPrice(float ratingPrice) {
+		this.ratingPrice = ratingPrice;
+	}
+
+	public float getRatingFavor() {
+		return ratingFavor;
+	}
+
+	public void setRatingFavor(float ratingFavor) {
+		this.ratingFavor = ratingFavor;
+	}
+
+	public float getRatingUnkonw() {
+		return ratingUnkonw;
+	}
+
+	public void setRatingUnkonw(float ratingUnkonw) {
+		this.ratingUnkonw = ratingUnkonw;
+	}
+
+	public String[] getTags() {
+		return tags;
+	}
+
+	public void setTags(String[] tags) {
+		this.tags = tags;
+	}
+
+	public boolean isBlocked() {
+		return isBlocked;
+	}
+
+	public void setBlocked(boolean isBlocked) {
+		this.isBlocked = isBlocked;
+	}
+
+	public Bundle save() {
+		Bundle data = new Bundle();
+		data.putLong(ID, getId());
+		data.putLong(STORE_ID, getStoreId());
+		data.putString(GOOGLE_STORE_ID, getGoogleStoreId());
+		data.putString(NAME, getName());
+		data.putString(ADDRESS, getAddress());
+		data.putString(PHONE, getPhone());
+		data.putDouble(LONGTITUDE, getLongtitude());
+		data.putDouble(LATITUDE, getLatitude());
+		data.putString(FIRST_LEVEL, getFirstLevel());
+		data.putString(THIRD_LEVEL, getThirdLevel());
+		data.putFloat(RATING_CLEAN, getRatingClean());
+		data.putFloat(RATING_SERVICE, getRatingService());
+		data.putFloat(RATING_PRICE, getRatingPrice());
+		data.putFloat(RATING_FAVOR, getRatingFavor());
+		data.putFloat(RATING_UNKNOW, getRatingUnkonw());
+		data.putBoolean(IS_BLOCKED, isBlocked());
+		data.putStringArray(TAGS, getTags());
+		return data;
+	}
+
+	@Override
+	public String toString() {
+		return new Gson().toJson(StoreInfo.this);
+	}
+}

@@ -1,0 +1,237 @@
+package edu.utboy.biteit.ui;
+
+import idv.andylin.tw.andyandroidlibs.HandlerCallBack;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Message;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewPager;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewTreeObserver;
+import android.widget.Button;
+
+import com.viewpagerindicator.CirclePageIndicator;
+
+import edu.utboy.biteit.R;
+import edu.utboy.biteit.ui.adapters.StoreInfoPicAdapter;
+import edu.utboy.biteit.ui.pages.StoreInfoPicFragment;
+import edu.utboy.biteit.utils.ObservableScrollView;
+
+public class StoreInfoActivity extends FragmentActivity {
+
+	private static final int STORE_INFO_FEEDBACK_RESULT = 1;
+
+	private static final int STATE_ONSCREEN = 0;
+	private static final int STATE_OFFSCREEN = 1;
+	private static final int STATE_RETURNING = 2;
+
+	private ViewPager picPager;
+	private CirclePageIndicator cpi;
+	private StoreInfoPicAdapter mStoreInfoPicAdapter;
+	private List<Fragment> storeInfoPicFragments;
+
+	private View mStickyView;
+	private View mPlaceholderView;
+	private ObservableScrollView mObservableScrollView;
+	private ScrollSettleHandler mScrollSettleHandler = new ScrollSettleHandler();
+
+	private int mMinRawY = 0;
+	private int mState = STATE_ONSCREEN;
+	private int mQuickReturnHeight;
+	private int mMaxScrollY;
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_store_info);
+		picPager = (ViewPager) findViewById(R.id.activity_store_info_pic_pager);
+		cpi = (CirclePageIndicator) findViewById(R.id.indicator);
+		mObservableScrollView = (ObservableScrollView) findViewById(R.id.activity_store_info_scroll_view);
+		mStickyView = findViewById(R.id.activity_store_info_function);
+		mPlaceholderView = findViewById(R.id.activity_store_info_placeholder);
+
+		storeInfoPicFragments = new ArrayList<Fragment>();
+		mStoreInfoPicAdapter = new StoreInfoPicAdapter(
+				getSupportFragmentManager(), storeInfoPicFragments);
+		picPager.setAdapter(mStoreInfoPicAdapter);
+		cpi.setViewPager(picPager);
+
+		init();
+
+		Button function3 = (Button) mStickyView
+				.findViewById(R.id.activity_store_info_function_btn3);
+		function3.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent();
+				intent.setClass(StoreInfoActivity.this,
+						StoreInfoFeedbackActivity.class);
+				startActivityForResult(intent, STORE_INFO_FEEDBACK_RESULT);
+				overridePendingTransition(R.anim.abc_fade_in,
+						R.anim.abc_fade_out);
+			}
+		});
+	}
+
+	private String[] picUrls = {
+			"http://www.wrcmania.com/images/Immagini-forum/22/raychel-frew-sexy-hottie-chick-lingerie.jpg",
+			"https://slm-assets1.secondlife.com/assets/2586756/lightbox/sexy_01-10.jpg?1291021756",
+			"http://i1277.photobucket.com/albums/y496/ahmberquistgard/Gi16_zpse5c87582.jpg" };
+
+	private void getAllData() {
+		for (String picUrl : picUrls) {
+			Bundle data = new Bundle();
+			data.putString(StoreInfoPicFragment.STORE_INFO_PIC_URI, picUrl);
+			Fragment fragment = new StoreInfoPicFragment();
+			fragment.setArguments(data);
+			storeInfoPicFragments.add(fragment);
+		}
+	}
+
+	private void init() {
+		mObservableScrollView.setCallbacks(mObservableScrollViewCallbacks);
+		mObservableScrollView.getViewTreeObserver().addOnGlobalLayoutListener(
+				new ViewTreeObserver.OnGlobalLayoutListener() {
+					@Override
+					public void onGlobalLayout() {
+						mObservableScrollViewCallbacks
+								.onScrollChanged(mObservableScrollView
+										.getScrollY());
+						mMaxScrollY = mObservableScrollView
+								.computeVerticalScrollRange()
+								- mObservableScrollView.getHeight();
+						mQuickReturnHeight = mStickyView.getHeight();
+					}
+				});
+
+		getAllData();
+		mStoreInfoPicAdapter.notifyDataSetChanged();
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		switch (requestCode) {
+		case STORE_INFO_FEEDBACK_RESULT:
+
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	private ObservableScrollView.Callbacks mObservableScrollViewCallbacks = new ObservableScrollView.Callbacks() {
+
+		@Override
+		public void onScrollChanged(int scrollY) {
+			scrollY = Math.min(mMaxScrollY, scrollY);
+
+			mScrollSettleHandler.onScroll(scrollY);
+
+			int rawY = mPlaceholderView.getTop() - scrollY;
+			int translationY = 0;
+
+			switch (mState) {
+			case STATE_OFFSCREEN:
+				if (rawY <= mMinRawY) {
+					mMinRawY = rawY;
+				} else {
+					mState = STATE_RETURNING;
+				}
+				translationY = rawY;
+				break;
+
+			case STATE_ONSCREEN:
+				if (rawY < -mQuickReturnHeight) {
+					mState = STATE_OFFSCREEN;
+					mMinRawY = rawY;
+				}
+				translationY = rawY;
+				break;
+
+			case STATE_RETURNING:
+				translationY = (rawY - mMinRawY) - mQuickReturnHeight;
+				if (translationY > 0) {
+					translationY = 0;
+					mMinRawY = rawY - mQuickReturnHeight;
+				}
+
+				if (rawY > 0) {
+					mState = STATE_ONSCREEN;
+					translationY = rawY;
+				}
+
+				if (translationY < -mQuickReturnHeight) {
+					mState = STATE_OFFSCREEN;
+					mMinRawY = rawY;
+				}
+				break;
+			}
+			mStickyView.animate().cancel();
+			mStickyView.setTranslationY(translationY + scrollY);
+		}
+
+		@Override
+		public void onDownMotionEvent() {
+			mScrollSettleHandler.setSettleEnabled(false);
+		}
+
+		@Override
+		public void onUpOrCancelMotionEvent() {
+			mScrollSettleHandler.setSettleEnabled(true);
+			mScrollSettleHandler.onScroll(mObservableScrollView.getScrollY());
+		}
+
+	};
+
+	private class ScrollSettleHandler extends HandlerCallBack {
+		private static final int SETTLE_DELAY_MILLIS = 100;
+
+		private int mSettledScrollY = Integer.MIN_VALUE;
+		private boolean mSettleEnabled;
+
+		public void onScroll(int scrollY) {
+			if (mSettledScrollY != scrollY) {
+				// Clear any pending messages and post delayed
+				dataHandler.removeMessages(0);
+				dataHandler.sendEmptyMessageDelayed(0, SETTLE_DELAY_MILLIS);
+				mSettledScrollY = scrollY;
+			}
+		}
+
+		public void setSettleEnabled(boolean settleEnabled) {
+			mSettleEnabled = settleEnabled;
+		}
+
+		@Override
+		public void handleDataMessage(Message msg) {
+			// Handle the scroll settling.
+			if (STATE_RETURNING == mState && mSettleEnabled) {
+				int mDestTranslationY;
+				if (mSettledScrollY - mStickyView.getTranslationY() > mQuickReturnHeight / 2) {
+					mState = STATE_OFFSCREEN;
+					mDestTranslationY = Math.max(mSettledScrollY
+							- mQuickReturnHeight, mPlaceholderView.getTop());
+				} else {
+					mDestTranslationY = mSettledScrollY;
+				}
+
+				mMinRawY = mPlaceholderView.getTop() - mQuickReturnHeight
+						- mDestTranslationY;
+				mStickyView.animate().translationY(mDestTranslationY);
+			}
+			mSettledScrollY = Integer.MIN_VALUE; // reset
+
+		}
+
+	}
+
+}

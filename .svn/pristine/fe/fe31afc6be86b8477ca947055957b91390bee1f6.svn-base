@@ -1,0 +1,79 @@
+package edu.utboy.biteit.models;
+
+import android.net.Uri;
+import android.os.Bundle;
+
+import com.google.gson.Gson;
+
+public class PhotoComment {
+
+	public final static String ID = "photocomment_id";
+	public final static String STORE_ID = "photocomment_store_id";
+	public final static String URI = "photocomment_uri";
+	public final static String COMMENT = "photocomment_comment";
+
+	private long id;
+	private long storeId;
+	private Uri uriString;
+	private String comment;
+
+	public PhotoComment(Bundle data) {
+		id = data.getLong(ID);
+		storeId = data.getLong(STORE_ID);
+		uriString = Uri.parse(data.getString(URI));
+		comment = data.getString(COMMENT);
+	}
+
+	public PhotoComment(long id, long storeId, Uri uri, String comment) {
+		this.id = id;
+		this.storeId = storeId;
+		this.uriString = uri;
+		this.comment = comment;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public long getStoreId() {
+		return storeId;
+	}
+
+	public void setStoreId(long storeId) {
+		this.storeId = storeId;
+	}
+
+	public Uri getUri() {
+		return uriString;
+	}
+
+	public void setUri(Uri uri) {
+		this.uriString = uri;
+	}
+
+	public String getComment() {
+		return comment;
+	}
+
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	public Bundle save() {
+		Bundle data = new Bundle();
+		data.putLong(ID, getId());
+		data.putLong(STORE_ID, getStoreId());
+		data.putString(URI, getUri().toString());
+		data.putString(COMMENT, getComment());
+		return data;
+	}
+
+	@Override
+	public String toString() {
+		return new Gson().toJson(PhotoComment.this);
+	}
+}

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/drawer_event_detail_first"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_margin="@dimen/activity_horizontal_padding"
+        android:drawableEnd="@drawable/abc_ic_voice_search_api_holo_light"
+        android:drawableLeft="@drawable/abc_ic_commit_search_api_holo_light"
+        android:drawableRight="@drawable/abc_ic_voice_search_api_holo_light"
+        android:drawableStart="@drawable/abc_ic_commit_search_api_holo_light"
+        android:gravity="center_vertical"
+        android:lines="1"
+        android:text="@string/title_section1"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/drawer_event_detail_second"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_margin="@dimen/activity_horizontal_padding"
+        android:drawableEnd="@drawable/abc_ic_voice_search_api_holo_light"
+        android:drawableLeft="@drawable/abc_ic_commit_search_api_holo_light"
+        android:drawableRight="@drawable/abc_ic_voice_search_api_holo_light"
+        android:drawableStart="@drawable/abc_ic_commit_search_api_holo_light"
+        android:gravity="center_vertical"
+        android:lines="1"
+        android:text="@string/title_section2"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/drawer_event_detail_third"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_margin="@dimen/activity_horizontal_padding"
+        android:drawableEnd="@drawable/abc_ic_voice_search_api_holo_light"
+        android:drawableLeft="@drawable/abc_ic_commit_search_api_holo_light"
+        android:drawableRight="@drawable/abc_ic_voice_search_api_holo_light"
+        android:drawableStart="@drawable/abc_ic_commit_search_api_holo_light"
+        android:gravity="center_vertical"
+        android:lines="1"
+        android:text="@string/title_section3"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:id="@+id/drawer_event_detail_maybe_you"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_margin="@dimen/activity_horizontal_padding"
+        android:drawableEnd="@drawable/abc_ic_voice_search_api_holo_light"
+        android:drawableLeft="@drawable/abc_ic_commit_search_api_holo_light"
+        android:drawableRight="@drawable/abc_ic_voice_search_api_holo_light"
+        android:drawableStart="@drawable/abc_ic_commit_search_api_holo_light"
+        android:drawableTop="@drawable/abc_ic_menu_moreoverflow_normal_holo_light"
+        android:gravity="center_vertical"
+        android:lines="1"
+        android:text="@string/title_section2"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+</LinearLayout>

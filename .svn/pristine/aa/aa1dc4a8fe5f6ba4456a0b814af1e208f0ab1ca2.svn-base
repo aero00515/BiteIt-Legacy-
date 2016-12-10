@@ -1,0 +1,117 @@
+package edu.utboy.biteit.asynctasks;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+import android.content.res.AssetManager;
+
+public class VolleyTaskManager {
+
+	private static final String SERVICE_PROPERTIES = "service.properties";
+
+	/**
+	 * static Singleton instance
+	 */
+	private static VolleyTaskManager instance;
+
+	private static String serverUrl;
+	private static String hostName;
+	private static String port;
+	private static String apiRoot;
+	private static String format;
+	private static String apiNewAccount;
+	private static String apiAuth;
+	private static String apiAccount;
+	private static String apiStoreInfo;
+	private static String apiStorePhotoComment;
+
+	/**
+	 * Private constructor for singleton
+	 */
+	private VolleyTaskManager() {
+	}
+
+	/**
+	 * Static getter method for retrieving the singleton instance
+	 */
+	public static VolleyTaskManager getInstance() {
+		if (instance == null) {
+			synchronized (VolleyTaskManager.class) {
+				if (instance == null) {
+					instance = new VolleyTaskManager();
+				}
+			}
+		}
+		return instance;
+	}
+
+	public void init(final AssetManager assetManager) {
+		try {
+			InputStream inputStream = assetManager.open(SERVICE_PROPERTIES);
+			Properties properties = new Properties();
+			properties.load(inputStream);
+
+			VolleyTaskManager.hostName = properties.getProperty("hostname");
+			VolleyTaskManager.port = properties.getProperty("port");
+			VolleyTaskManager.apiRoot = properties.getProperty("apiRoot");
+			VolleyTaskManager.format = properties.getProperty("format");
+			VolleyTaskManager.apiNewAccount = properties
+					.getProperty("apiNewAccount");
+			VolleyTaskManager.apiAuth = properties.getProperty("apiAuth");
+			VolleyTaskManager.apiAccount = properties.getProperty("apiAccount");
+			VolleyTaskManager.apiStoreInfo = properties
+					.getProperty("apiStoreInfo");
+			VolleyTaskManager.apiStorePhotoComment = properties
+					.getProperty("apiStorePhotoComment");
+			VolleyTaskManager.serverUrl = "http://" + hostName + ":" + port
+					+ "/" + apiRoot + "/";
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Ex:<br>
+	 * http://hostname:port/apiRoot/
+	 */
+	public String getServerUrl() {
+		return serverUrl;
+	}
+
+	public String getHostName() {
+		return hostName;
+	}
+
+	public String getPort() {
+		return port;
+	}
+
+	public String getApiRoot() {
+		return apiRoot;
+	}
+
+	public String getFormat() {
+		return format;
+	}
+
+	public String getApiNewAccount() {
+		return apiNewAccount;
+	}
+
+	public String getAuth() {
+		return apiAuth;
+	}
+
+	public String getApiAccount() {
+		return apiAccount;
+	}
+
+	public String getApiStoreInfo() {
+		return apiStoreInfo;
+	}
+
+	public String getApiStorePhotoComment() {
+		return apiStorePhotoComment;
+	}
+}

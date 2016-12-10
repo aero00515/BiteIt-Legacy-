@@ -1,0 +1,366 @@
+package edu.utboy.biteit;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import android.app.Activity;
+import android.location.Location;
+import android.net.Uri;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+
+import edu.utboy.biteit.models.PhotoComment;
+import edu.utboy.biteit.models.StoreInfo;
+import edu.utboy.biteit.models.StorePhotoComments;
+import edu.utboy.biteit.ui.adapters.FragmentViewPagerAdapter;
+import edu.utboy.biteit.ui.pages.SlideshowFragment;
+
+public class MainActivity extends ActionBarActivity implements
+		NavigationDrawerFragment.NavigationDrawerCallbacks {
+
+	private GoogleMap gMap;
+	private CameraPosition cameraPosition;
+	private PagerContainer mContainer;
+	private FragmentViewPagerAdapter slideshowPicAdapter;
+	private ViewPager pager;
+	private List<Fragment> slideshowPicFragments;
+	private boolean isLocationChange = false;
+
+	/**
+	 * Fragment managing the behaviors, interactions and presentation of the
+	 * navigation drawer.
+	 */
+	private NavigationDrawerFragment mNavigationDrawerFragment;
+
+	/**
+	 * Used to store the last screen title. For use in
+	 * {@link #restoreActionBar()}.
+	 */
+	private CharSequence mTitle;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+
+		slideshowPicFragments = new ArrayList<Fragment>();
+		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
+				this).build();
+		ImageLoader.getInstance().init(config);
+		slideshowPicAdapter = new FragmentViewPagerAdapter(
+				getSupportFragmentManager(), slideshowPicFragments);
+
+		mNavigationDrawerFragment = (NavigationDrawerFragment) getSupportFragmentManager()
+				.findFragmentById(R.id.navigation_drawer);
+		mContainer = (PagerContainer) findViewById(R.id.pager_container);
+		pager = (ViewPager) findViewById(R.id.pager);
+		mNavigationDrawerFragment.setUp(R.id.navigation_drawer,
+				(DrawerLayout) findViewById(R.id.drawer_layout));
+
+		mTitle = getTitle();
+
+		// Set up the drawer.
+
+		pager = mContainer.getViewPager();
+		pager.setAdapter(slideshowPicAdapter);
+		pager.setOffscreenPageLimit(5);
+		pager.setPageMargin(15);
+
+		// If hardware acceleration is enabled, you should also remove
+		// clipping on the pager for its children.
+		pager.setClipChildren(false);
+
+		initTestStoreInfo();
+		setSlideshowPic();
+		initGoogleMap();
+
+		/**  Example of Server request
+		VolleyTaskManager.getInstance().init(getAssets());
+		try {
+			final JSONObject user = NewUserRequest.getInstance()
+					.getNewUserRequestBody("test1", "123321", "", "",
+							"aero00515@gmail.com");
+
+			NewUserRequest.getInstance().newUser(getApplicationContext(), user,
+					new Response.Listener<JSONObject>() {
+
+						@Override
+						public void onResponse(JSONObject response) {
+							VolleyLog.d("json", response.toString());
+							Bundle data = new Bundle();
+							try {
+								data = NewUserRequest.getInstance()
+										.getUserTokenData(response,
+												user.getString("password"));
+							} catch (JSONException e) {
+								e.printStackTrace();
+							}
+							Intent intent = new Intent();
+							intent.setAction(SyncUserDataService.SAVE_DATA);
+							intent.putExtra(SyncUserDataService.SYNC_DATA, data);
+							startService(intent);
+						}
+					}, new Response.ErrorListener() {
+
+						@Override
+						public void onErrorResponse(VolleyError error) {
+							VolleyLog.e("json", error.getMessage());
+						}
+					});
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		*/
+	}
+
+	private void initGoogleMap() {
+		if (gMap == null) {
+			gMap = ((MapFragment) getFragmentManager().findFragmentById(
+					R.id.map)).getMap();
+		}
+
+		gMap.getUiSettings().setMyLocationButtonEnabled(true);
+		gMap.setMyLocationEnabled(true);
+		gMap.setOnCameraChangeListener(new OnCameraChangeListener() {
+			@Override
+			public void onCameraChange(CameraPosition position) {
+				Log.d("MainActivity", "Camera change: "
+						+ position.target.latitude + " "
+						+ position.target.longitude);
+			}
+		});
+
+		final MarkerOptions marker = new MarkerOptions();
+
+		gMap.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+
+			@Override
+			public void onMyLocationChange(Location loc) {
+				if (!isLocationChange) {
+					isLocationChange = true;
+					cameraPosition = new CameraPosition.Builder()
+							.target(new LatLng(loc.getLatitude(), loc
+									.getLongitude())).zoom(15).build();
+
+					marker.position(cameraPosition.target)
+							.icon(BitmapDescriptorFactory
+									.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
+							.title("My location!").alpha(0.6f);
+
+					gMap.addMarker(marker).showInfoWindow();
+
+					gMap.animateCamera(CameraUpdateFactory
+							.newCameraPosition(cameraPosition));
+				}
+			}
+		});
+	}
+
+	private void getBounds(CameraPosition position) {
+		LatLng centerPoint = position.target;
+		LatLng cameraNorth = gMap.getProjection().getVisibleRegion().latLngBounds.northeast;
+		LatLng cameraSouth = gMap.getProjection().getVisibleRegion().latLngBounds.southwest;
+		LatLng cameraWest = gMap.getProjection().getVisibleRegion().farLeft;
+		LatLng cameraEast = gMap.getProjection().getVisibleRegion().farRight;
+	}
+
+	private void setSlideshowPic() {
+		for (int i = 0; i < testStoreInfos.size(); i++) {
+
+			PhotoComment photoComment = testStoreInfos.get("testInfo" + i)
+					.getPhotocomments().get(0);
+
+			Bundle data = new Bundle();
+			data.putString(SlideshowFragment.SLIDESHOW_PIC_URI, photoComment
+					.getUri().toString());
+			data.putInt(SlideshowFragment.SlIDESHOW_PIC_NUMBER, i);
+			Fragment fragment = new SlideshowFragment();
+			fragment.setArguments(data);
+			slideshowPicFragments.add(fragment);
+		}
+		slideshowPicAdapter.notifyDataSetChanged();
+	}
+
+	@Override
+	public void onNavigationDrawerItemSelected(int position) {
+		// update the main content by replacing fragments
+		FragmentManager fragmentManager = getSupportFragmentManager();
+		fragmentManager
+				.beginTransaction()
+				.replace(R.id.container,
+						PlaceholderFragment.newInstance(position + 1)).commit();
+	}
+
+	public void onSectionAttached(int number) {
+		switch (number) {
+		case 1:
+			mTitle = getString(R.string.title_section1);
+			break;
+		case 2:
+			mTitle = getString(R.string.title_section2);
+			break;
+		case 3:
+			mTitle = getString(R.string.title_section3);
+			break;
+		}
+	}
+
+	public void restoreActionBar() {
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+		actionBar.setDisplayShowTitleEnabled(true);
+		actionBar.setTitle(mTitle);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		if (!mNavigationDrawerFragment.isDrawerOpen()) {
+			// Only show items in the action bar relevant to this screen
+			// if the drawer is not showing. Otherwise, let the drawer
+			// decide what to show in the action bar.
+			getMenuInflater().inflate(R.menu.main, menu);
+			restoreActionBar();
+			return true;
+		}
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar item clicks here. The action bar will
+		// automatically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
+		int id = item.getItemId();
+		if (id == R.id.action_settings) {
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	// 10 test food pictures
+	private String[] foodPicUrls = {
+			"http://0492918997.tw.tranews.com/images/Info/Y007889000001_2_1.JPG",
+			"http://kaohsiung.tranews.com/Show/images/Store/Y008223000001_1_1.jpg",
+			"http://0912815968.tranews.com/images/Info/Y011465000001_1_1.jpg",
+			"http://ext.pimg.tw/kavanachang/1373459876-2427041519.jpg",
+			"http://039870670.tw.tranews.com/Show/images/News/3243135_1.jpg",
+			"http://0922653602.tw.tranews.com/images/Info/Y007175000001_1_1.jpg",
+			"http://image.wtojob.com/upload/group/logo/20080526051644%E7%BE%8E%E9%A3%9F.jpg",
+			"http://034756132.tw.tranews.com/Show/images/News/3267923_1.jpg",
+			"http://www.taipeisleep.com/images/eat7.jpg",
+			"http://www.wall001.com/photograph/French_Food/mxxx01/[wall001.com]_French_Food_photo_EU196a.jpg" };
+
+	public static Map<String, StorePhotoComments> testStoreInfos;
+
+	/**
+	 * make a test StorePhotoComments' HashMap which contains 10
+	 * storePhotoComments
+	 */
+	public void initTestStoreInfo() {
+		testStoreInfos = new HashMap<String, StorePhotoComments>();
+
+		for (int i = 0; i < foodPicUrls.length; i++) {
+
+			List<PhotoComment> photoComments = new ArrayList<PhotoComment>();
+			photoComments.add(new PhotoComment(0L, 0L, Uri
+					.parse(foodPicUrls[i]), ""));
+			photoComments.add(new PhotoComment(1L, 1L, Uri
+					.parse(foodPicUrls[i]), ""));
+			photoComments.add(new PhotoComment(2L, 2L, Uri
+					.parse(foodPicUrls[i]), ""));
+			storePhotoComment = new StorePhotoComments(new StoreInfo(0L, 0L,
+					"益祥人力出租", "台北市中正區愛國西路一號", "0223335555", 121.22, 23.22,
+					4.0f, 4.5f, 3.0f, 5.0f, 3.5f, false, new String[] { "美食",
+							"讚" }), photoComments);
+
+			testStoreInfos.put("testInfo" + i, storePhotoComment);
+		}
+	}
+
+	/**
+	 * TEST
+	 */
+	public void initTest() {
+		List<PhotoComment> photoComments = new ArrayList<PhotoComment>();
+		PhotoComment photoComment0 = new PhotoComment(0L, 0L,
+				Uri.parse(picUrls[0]), "");
+		PhotoComment photoComment1 = new PhotoComment(1L, 0L,
+				Uri.parse(picUrls[1]), "");
+		PhotoComment photoComment2 = new PhotoComment(2L, 0L,
+				Uri.parse(picUrls[2]), "");
+		photoComments.add(photoComment0);
+		photoComments.add(photoComment1);
+		photoComments.add(photoComment2);
+		fakeSI = new StoreInfo(0L, 0L, "益祥人力出租", "台北市中正區愛國西路一號", "0223335555",
+				121.22, 23.22, 4.0f, 4.5f, 3.0f, 5.0f, 3.5f, false,
+				new String[] { "美食", "讚" });
+		storePhotoComment = new StorePhotoComments(fakeSI, photoComments);
+	}
+
+	private String[] picUrls = {
+			"http://www.wrcmania.com/images/Immagini-forum/22/raychel-frew-sexy-hottie-chick-lingerie.jpg",
+			"https://slm-assets1.secondlife.com/assets/2586756/lightbox/sexy_01-10.jpg?1291021756",
+			"http://i1277.photobucket.com/albums/y496/ahmberquistgard/Gi16_zpse5c87582.jpg" };
+
+	private static StoreInfo fakeSI;
+	public static StorePhotoComments storePhotoComment;
+
+	/**
+	 * END TEST
+	 */
+
+	/**
+	 * A placeholder fragment containing a simple view.
+	 */
+	public static class PlaceholderFragment extends Fragment {
+		/**
+		 * The fragment argument representing the section number for this
+		 * fragment.
+		 */
+		private static final String ARG_SECTION_NUMBER = "section_number";
+
+		/**
+		 * Returns a new instance of this fragment for the given section number.
+		 */
+		public static PlaceholderFragment newInstance(int sectionNumber) {
+			PlaceholderFragment fragment = new PlaceholderFragment();
+			Bundle args = new Bundle();
+			args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+			fragment.setArguments(args);
+			return fragment;
+		}
+
+		public PlaceholderFragment() {
+		}
+
+		@Override
+		public void onAttach(Activity activity) {
+			super.onAttach(activity);
+			((MainActivity) activity).onSectionAttached(getArguments().getInt(
+					ARG_SECTION_NUMBER));
+		}
+
+	}
+
+}

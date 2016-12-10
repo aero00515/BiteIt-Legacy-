@@ -1,0 +1,73 @@
+package edu.utboy.biteit.asynctasks;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+
+import org.json.JSONObject;
+
+import android.content.Context;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import edu.utboy.biteit.asynctasks.requestqueues.SampleRequestQueue;
+
+public class StorePhotoCommentRequest {
+
+	/**
+	 * static Singleton instance
+	 */
+	private static StorePhotoCommentRequest mVerifyUserRequest;
+	private VolleyTaskManager mVolleyTaskManager;
+	private String url;
+
+	/**
+	 * Private constructor for singleton
+	 */
+	private StorePhotoCommentRequest() {
+		mVolleyTaskManager = VolleyTaskManager.getInstance();
+	}
+
+	/**
+	 * Static getter method for retrieving the singleton instance
+	 */
+	public static StorePhotoCommentRequest getInstance() {
+		if (mVerifyUserRequest == null) {
+			synchronized (StorePhotoCommentRequest.class) {
+				if (mVerifyUserRequest == null) {
+					mVerifyUserRequest = new StorePhotoCommentRequest();
+				}
+			}
+		}
+		return mVerifyUserRequest;
+	}
+
+	public void storeInfoPhotoCommentRequest(Context context, long storeId,
+			Response.Listener<JSONObject> responseListener,
+			Response.ErrorListener errorListener) {
+		if (isInit()) {
+			url = mVolleyTaskManager.getServerUrl()
+					+ mVolleyTaskManager.getApiStorePhotoComment() + "?"
+					+ "store_id=" + storeId;
+			JsonObjectRequest jsonRequest = new JsonObjectRequest(
+					Request.Method.GET, url, null, responseListener,
+					errorListener);
+			SampleRequestQueue.getSampleRequestQueue(context)
+					.addToRequestQueue(jsonRequest);
+		}
+	}
+
+	public JSONObject getQueryAll() {
+		return new JSONObject();
+	}
+
+	private boolean isInit() {
+		if (mVolleyTaskManager.getServerUrl() == null) {
+			MyLog.e(StorePhotoCommentRequest.class,
+					"VolleyTaskManager needs to be init before using request!");
+			return false;
+		}
+		return true;
+	}
+
+}

@@ -1,0 +1,27 @@
+package edu.utboy.biteit.ui.adapters;
+
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import edu.utboy.biteit.ui.pages.SlideshowFragment;
+
+public class FragmentViewPagerAdapter extends FragmentStatePagerAdapter {
+
+	private int mSize;
+
+	public FragmentViewPagerAdapter(FragmentManager fm, int size) {
+		super(fm);
+		mSize = size;
+	}
+
+	@Override
+	public Fragment getItem(int position) {
+		return SlideshowFragment.newInstance(position);
+	}
+
+	@Override
+	public int getCount() {
+		return mSize;
+	}
+
+}

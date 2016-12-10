@@ -1,0 +1,137 @@
+package edu.utboy.biteit.models;
+
+import java.util.List;
+
+public class NewStore {
+	private String name;
+	private String address;
+	private String phone;
+	private double longitude;
+	private double latitude;
+	private String firstLevel;
+	private String thirdLevel;
+	private List<Photo> photoUris;
+
+	public NewStore(String name, String address, String phone,
+			double longitude, double latitude, String firstLevel,
+			String thirdLevel, List<Photo> photoUris) {
+		this.name = name;
+		this.address = address;
+		this.phone = phone;
+		this.longitude = longitude;
+		this.latitude = latitude;
+		this.firstLevel = firstLevel;
+		this.thirdLevel = thirdLevel;
+		this.photoUris = photoUris;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
+	}
+
+	public double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
+
+	public String getFirstLevel() {
+		return firstLevel;
+	}
+
+	public void setFirstLevel(String firstLevel) {
+		this.firstLevel = firstLevel;
+	}
+
+	public String getThirdLevel() {
+		return thirdLevel;
+	}
+
+	public void setThirdLevel(String thirdLevel) {
+		this.thirdLevel = thirdLevel;
+	}
+
+	public List<Photo> getPhotoUris() {
+		return photoUris;
+	}
+
+	public void setPhotoUris(List<Photo> photoUris) {
+		this.photoUris = photoUris;
+	}
+
+	@Override
+	public String toString() {
+		return "NewStore [name=" + name + ", address=" + address + ", phone="
+				+ phone + ", longitude=" + longitude + ", latitude=" + latitude
+				+ ", firstLevel=" + firstLevel + ", thirdLevel=" + thirdLevel
+				+ ", photoUris=" + photoUris + "]";
+	}
+
+	public class Photo {
+		private String uri;
+		private String comment;
+		private int attendNo;
+
+		public Photo(String uri, String comment, int attendNo) {
+			this.uri = uri;
+			this.comment = comment;
+			this.attendNo = attendNo;
+		}
+
+		public String getUri() {
+			return uri;
+		}
+
+		public void setUri(String uri) {
+			this.uri = uri;
+		}
+
+		public String getComment() {
+			return comment;
+		}
+
+		public void setComment(String comment) {
+			this.comment = comment;
+		}
+
+		public int getAttendNo() {
+			return attendNo;
+		}
+
+		public void setAttendNo(int attendNo) {
+			this.attendNo = attendNo;
+		}
+
+	}
+
+}

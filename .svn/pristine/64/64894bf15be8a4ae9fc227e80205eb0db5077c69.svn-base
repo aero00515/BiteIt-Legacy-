@@ -1,0 +1,92 @@
+package edu.utboy.biteit.db;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+
+import java.lang.reflect.Field;
+
+import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+public class DataBaseHelper extends SQLiteOpenHelper implements DbConstants {
+
+	private static final int DATABASE_VERSION = 1;
+	private static DataBaseHelper collectionDbOpenHelper;
+
+	private String sqlStoreInfo = 
+			"create table " + TABLE_STORE_INFO + "(" 
+					+ "integer primary key autoincrement " + _ID + ", "
+					+ "integer unique" + STORE_ID + ", "
+					+ "text " + ADDRESS + ", "
+					+ "text " + PHONE + ", "
+					+ "real" + LONGTITUDE + ", "
+					+ "real" + LATITUDE + ", "
+					+ "real" + RATING_CLEAN + ", "
+					+ "real" + RATING_SERVICE + ", "
+					+ "real" + RATING_PRICE + ", "
+					+ "real" + RATING_FAVOR + ", "
+					+ "real" + RATING_UNKNOW + ", "
+					+ "integer " + IS_BLOCKED + ", "
+					+ "text" + TAGS + ");";
+
+	private String sqlPhotoComment = 
+			"create table " + TABLE_PHOTO_COMMENT + "(" 
+					+ "integer primary key autoincrement " + _ID + ", " 
+					+ "integer unique" + STORE_ID + ", "
+					+ "text " + URI + ", " 
+					+ "text " + COMMENT + ");";
+
+	private String sqlFriend = 
+			"create table " + TABLE_FRIENDS + "(" 
+					+ "integer primary key autoincrement " + _ID + ", " 
+					+ "text unique" + USERNAME + ", "
+					+ "text " + NAME + ", "
+					+ "text " + URI + ", "
+					+ "text " + EMAIL + ", "
+					+ "integer " + IS_BLOCKED + ", "
+					+ "integer " + IS_FOCUSED + ");";
+
+	private final String[] SQL_STRING = { sqlPhotoComment, sqlStoreInfo, sqlFriend };
+
+	private DataBaseHelper(Context ctx) {
+		super(ctx, ctx.getPackageName(), null, DATABASE_VERSION);
+		MyLog.i(DataBaseHelper.class, "db new helper: " + ctx.getPackageName());
+	}
+
+	public static DataBaseHelper getDbHelper(Context context) {
+		if (collectionDbOpenHelper == null) {
+			synchronized (DataBaseHelper.class) {
+				if (collectionDbOpenHelper == null) {
+					collectionDbOpenHelper = new DataBaseHelper(context);
+				}
+			}
+		}
+		return collectionDbOpenHelper;
+	}
+
+	@Override
+	public void onCreate(SQLiteDatabase db) {
+
+		for (String sql : SQL_STRING) {
+			db.execSQL(sql);
+			MyLog.i(DataBaseHelper.class, "db create: " + sql);
+		}
+
+	}
+
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		MyLog.i(DataBaseHelper.class, "upgarde, old: " + oldVersion + ", new: "
+				+ newVersion);
+		for (Field field : DbConstants.class.getDeclaredFields()) {
+			if (field
+					.isAnnotationPresent(idv.andylin.tw.andyandroidlibs.DbConstants.Table.class)) {
+				String sql = "DROP TABLE IF EXISTS " + field.getName();
+				db.execSQL(sql);
+				MyLog.i(DataBaseHelper.class, "db update :" + sql);
+			}
+		}
+		onCreate(db);
+	}
+
+}

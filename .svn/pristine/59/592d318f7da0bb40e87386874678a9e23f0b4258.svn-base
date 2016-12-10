@@ -1,0 +1,180 @@
+package edu.utboy.biteit.models.dao;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import edu.utboy.biteit.db.DataBaseHelper;
+import edu.utboy.biteit.models.PhotoComment;
+
+public class PhotoCommentDAO extends BaseDAO<PhotoComment> {
+
+	public PhotoCommentDAO(Context ctx) {
+		super(ctx);
+	}
+
+	public List<PhotoComment> getStoreFriendsPhotoComments(long storeId,
+			long userId) {
+		List<PhotoComment> photoComments = new ArrayList<PhotoComment>();
+
+		Cursor cursor = database
+				.query(DataBaseHelper.TABLE_PHOTO_COMMENT,
+						columns,
+						DataBaseHelper.STORE_ID + "=? AND "
+								+ DataBaseHelper.USER_ID + "=?",
+						new String[] { String.valueOf(storeId),
+								String.valueOf(userId) }, null, null, null);
+
+		cursor.moveToFirst();
+		while (!cursor.isAfterLast()) {
+			PhotoComment photoComment = cursorTo(cursor);
+			photoComments.add(photoComment);
+			cursor.moveToNext();
+		}
+		// make sure to close the cursor
+		cursor.close();
+		return photoComments;
+	}
+
+	public List<PhotoComment> getStorePhotoComments(long storeId) {
+		List<PhotoComment> photoComments = new ArrayList<PhotoComment>();
+
+		Cursor cursor = database.query(DataBaseHelper.TABLE_PHOTO_COMMENT,
+				columns, DataBaseHelper.STORE_ID + "=?",
+				new String[] { String.valueOf(storeId) }, null, null, null);
+
+		cursor.moveToFirst();
+		while (!cursor.isAfterLast()) {
+			PhotoComment photoComment = cursorTo(cursor);
+			photoComments.add(photoComment);
+			cursor.moveToNext();
+		}
+		// make sure to close the cursor
+		cursor.close();
+		return photoComments;
+	}
+
+	@Override
+	protected void setAllColumns() {
+		columns = new String[] { DataBaseHelper.STORE_ID,
+				DataBaseHelper.USER_ID, DataBaseHelper.URI,
+				DataBaseHelper.COMMENT };
+
+	}
+
+	@Override
+	protected PhotoComment cursorTo(Cursor cursor) {
+		long storeId = cursor.getLong(cursor
+				.getColumnIndex(DataBaseHelper.STORE_ID));
+		long userId = cursor.getLong(cursor
+				.getColumnIndex(DataBaseHelper.USER_ID));
+		String uri = cursor
+				.getString(cursor.getColumnIndex(DataBaseHelper.URI));
+		String comment = cursor.getString(cursor
+				.getColumnIndex(DataBaseHelper.COMMENT));
+		PhotoComment photoComment = new PhotoComment(storeId, userId,
+				Uri.parse(uri), comment);
+		return photoComment;
+	}
+
+	@Override
+	public long save(PhotoComment photoComment) {
+		ContentValues values = new ContentValues();
+		values.put(DataBaseHelper.STORE_ID, photoComment.getStoreId());
+		values.put(DataBaseHelper.USER_ID, photoComment.getStoreId());
+		values.put(DataBaseHelper.URI, photoComment.getUri().toString());
+		values.put(DataBaseHelper.COMMENT, photoComment.getComment());
+		return database
+				.insert(DataBaseHelper.TABLE_PHOTO_COMMENT, null, values);
+	}
+
+	@Override
+	public List<Long> save(List<PhotoComment> photoComments) {
+		List<Long> saveIds = new ArrayList<Long>(photoComments.size());
+		for (PhotoComment photoComment : photoComments) {
+			ContentValues values = new ContentValues();
+			values.put(DataBaseHelper.STORE_ID, photoComment.getStoreId());
+			values.put(DataBaseHelper.USER_ID, photoComment.getStoreId());
+			values.put(DataBaseHelper.URI, photoComment.getUri().toString());
+			values.put(DataBaseHelper.COMMENT, photoComment.getComment());
+			saveIds.add(database.insert(DataBaseHelper.TABLE_PHOTO_COMMENT,
+					null, values));
+		}
+		return saveIds;
+	}
+
+	@Override
+	public void update(PhotoComment photoComment) {
+		ContentValues values = new ContentValues();
+		values.put(DataBaseHelper.STORE_ID, photoComment.getStoreId());
+		values.put(DataBaseHelper.USER_ID, photoComment.getUserId());
+		values.put(DataBaseHelper.URI, photoComment.getUri().toString());
+		values.put(DataBaseHelper.COMMENT, photoComment.getComment());
+
+		database.update(DataBaseHelper.TABLE_FRIENDS, values,
+				DataBaseHelper.URI + "=?", new String[] { photoComment.getUri()
+						.toString() });
+	}
+
+	@Override
+	public boolean delete(PhotoComment object) {
+		return database.delete(DataBaseHelper.TABLE_PHOTO_COMMENT,
+				DataBaseHelper.URI + "=?", new String[] { object.getUri()
+						.toString() }) > 0;
+	}
+
+	@Override
+	public boolean delete(List<PhotoComment> objects) {
+		boolean isDeleted = true;
+		for (PhotoComment photoComment : objects) {
+			if (database.delete(DataBaseHelper.TABLE_PHOTO_COMMENT,
+					DataBaseHelper.URI + "=?", new String[] { photoComment
+							.getUri().toString() }) == 0)
+				isDeleted = false;
+		}
+		return isDeleted;
+	}
+
+	@Override
+	public List<PhotoComment> get() {
+		List<PhotoComment> photoComments = new ArrayList<PhotoComment>();
+
+		Cursor cursor = database.query(DataBaseHelper.TABLE_PHOTO_COMMENT,
+				columns, null, null, null, null, null);
+
+		cursor.moveToFirst();
+		while (!cursor.isAfterLast()) {
+			PhotoComment photoComment = cursorTo(cursor);
+			photoComments.add(photoComment);
+			cursor.moveToNext();
+		}
+		// make sure to close the cursor
+		cursor.close();
+		return photoComments;
+	}
+
+	/**
+	 * This method is not adviced to use.
+	 * 
+	 * @param num
+	 *            the number of row
+	 */
+	@Override
+	public PhotoComment get(long num) {
+		List<PhotoComment> photoComments = new ArrayList<PhotoComment>();
+
+		Cursor cursor = database.query(DataBaseHelper.TABLE_PHOTO_COMMENT,
+				columns, null, null, null, null, null);
+
+		cursor.moveToPosition((int) num);
+		PhotoComment photoComment = cursorTo(cursor);
+		photoComments.add(photoComment);
+		// make sure to close the cursor
+		cursor.close();
+		return photoComments.get(0);
+	}
+
+}

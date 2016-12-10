@@ -1,0 +1,68 @@
+package edu.utboy.biteit.models;
+
+public class Friend {
+	private long id;
+	private long storeId;
+	private String name;
+	private String photo;
+	private String email;
+	private boolean isFocused;
+
+	public Friend(long id, long storeId, String name, String photo,
+			String email, boolean isFocused) {
+		this.id = id;
+		this.storeId = storeId;
+		this.name = name;
+		this.photo = photo;
+		this.email = email;
+		this.isFocused = isFocused;
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public long getStoreId() {
+		return storeId;
+	}
+
+	public void setStoreId(long storeId) {
+		this.storeId = storeId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getPhoto() {
+		return photo;
+	}
+
+	public void setPhoto(String photo) {
+		this.photo = photo;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public boolean isFocued() {
+		return isFocused;
+	}
+
+	public void setFocued(boolean isFocused) {
+		this.isFocused = isFocused;
+	}
+}

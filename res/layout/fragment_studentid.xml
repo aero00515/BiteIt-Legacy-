@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <EditText
+        android:id="@+id/fragment_studentid_input_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:ems="10"
+        android:hint="@string/tutorial_stdid_hint"
+        android:lines="1" >
+
+        <requestFocus />
+    </EditText>
+
+    <Button
+        android:id="@+id/fragment_studentid_next_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/fragment_studentid_input_text"
+        android:layout_alignEnd="@+id/fragment_studentid_input_text"
+        android:layout_below="@+id/fragment_studentid_input_text"
+        android:text="@string/tutorial_stdid_next" />
+
+</RelativeLayout>

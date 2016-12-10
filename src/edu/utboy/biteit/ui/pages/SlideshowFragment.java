@@ -1,0 +1,98 @@
+package edu.utboy.biteit.ui.pages;
+
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+
+import edu.utboy.biteit.MainActivity;
+import edu.utboy.biteit.R;
+
+public class SlideshowFragment extends Fragment {
+
+	public final static String SLIDESHOW_PIC_URI = "slideshow_pic_uri";
+	public final static String SlIDESHOW_PIC_NUMBER = "slideshow_pic_number";
+	public final static String SLIDESHOW_PIC_NAME = "slideshow_pic_name";
+	public final static String SLIDESHOW_PIC_MODE = "slideshow_pic_mode";
+
+	private int mNum;
+	private DisplayImageOptions mDisplayImageOptions;
+	private String uri;
+	private String storeName;
+	private String mode;
+	private OnSlideshowImgClicked listener;
+
+	public SlideshowFragment() {
+		super();
+	}
+
+	public SlideshowFragment(OnSlideshowImgClicked listener) {
+		this.listener = listener;
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		Bundle bundle = getArguments();
+		mDisplayImageOptions = new DisplayImageOptions.Builder()
+				.showImageOnFail(R.drawable.ic_launcher)
+				.showImageOnLoading(R.drawable.ic_launcher).cacheInMemory(true)
+				.cacheOnDisk(true).build();
+
+		uri = bundle.getString(SLIDESHOW_PIC_URI);
+		mNum = bundle.getInt(SlIDESHOW_PIC_NUMBER);
+		storeName = bundle.getString(SLIDESHOW_PIC_NAME);
+		mode = bundle.getString(SLIDESHOW_PIC_MODE);
+	}
+
+	@Override
+	public View onCreateView(final LayoutInflater inflater,
+			final ViewGroup container, Bundle savedInstanceState) {
+
+		View view = inflater.inflate(R.layout.fragment_slideshow_image,
+				container, false);
+		ImageView imageView = (ImageView) view.findViewById(R.id.page_image);
+		TextView text = (TextView) view.findViewById(R.id.page_text);
+
+		if (uri.equals("")) {
+			text.setVisibility(View.VISIBLE);
+			if (mode == MainActivity.STORE_MODE_TAG) {
+				text.setText(storeName);
+				text.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						Log.d("SlideshowFragment", "Click Page: " + mNum);
+						listener.onImgClicked(mNum);
+					}
+				});
+			} else if (mode == MainActivity.FRIEND_MODE_TAG) {
+				text.setText("尚無朋友吃過");
+			}
+
+		} else {
+			ImageLoader.getInstance().displayImage(uri, imageView,
+					mDisplayImageOptions);
+			imageView.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Log.d("SlideshowFragment", "Click Page: " + mNum);
+					listener.onImgClicked(mNum);
+				}
+			});
+		}
+		return view;
+	}
+
+	public interface OnSlideshowImgClicked {
+		void onImgClicked(int mNum);
+	}
+}

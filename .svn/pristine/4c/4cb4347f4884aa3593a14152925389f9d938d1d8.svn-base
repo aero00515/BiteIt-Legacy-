@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edu.utboy.biteit.utils.ObservableScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_store_info_scroll_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <FrameLayout
+            android:id="@+id/activity_store_info_placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/sticky_height" >
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/activity_store_info_pic_pager_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/activity_store_info_placeholder"
+            android:minHeight="@dimen/store_info_pic_min_height" >
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/activity_store_info_pic_pager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+            </android.support.v4.view.ViewPager>
+        </LinearLayout>
+
+        <com.viewpagerindicator.CirclePageIndicator
+            android:id="@+id/indicator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/activity_store_info_pic_pager_layout"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:paddingTop="@dimen/activity_vertical_padding" />
+
+        <LinearLayout
+            android:id="@+id/activity_store_info_rating_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/indicator"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:layout_marginEnd="@dimen/activity_horizontal_padding"
+            android:layout_marginRight="@dimen/activity_horizontal_padding" >
+
+            <TextView
+                android:id="@+id/activity_store_info_total_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="@dimen/activity_horizontal_padding"
+                android:layout_marginRight="@dimen/activity_horizontal_padding"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text="@string/activity_store_info_total_rating"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <TableLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical" >
+
+                <TableRow
+                    android:id="@+id/tableRow1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/activity_store_info_clean"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="@string/activity_store_info_clean"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                    <ImageView
+                        android:id="@+id/activity_store_info_clean_rating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="49"
+                        android:contentDescription="@string/activity_store_info_rating"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/rating_4" />
+
+                    <TextView
+                        android:id="@+id/activity_store_info_favor"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="@string/activity_store_info_favor"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                    <ImageView
+                        android:id="@+id/imageView2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="49"
+                        android:contentDescription="@string/activity_store_info_rating"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/rating_4" />
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/activity_store_info_service"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="@string/activity_store_info_service"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                    <ImageView
+                        android:id="@+id/activity_store_info_feedback_close"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="49"
+                        android:contentDescription="@string/activity_store_info_rating"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/rating_5" />
+
+                    <TextView
+                        android:id="@+id/activity_store_info_unknow"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="@string/activity_store_info_unknow"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                    <ImageView
+                        android:id="@+id/imageView3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="49"
+                        android:contentDescription="@string/activity_store_info_rating"
+                        android:scaleType="centerInside"
+                        android:src="@drawable/rating_3" />
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" >
+
+                    <TextView
+                        android:id="@+id/activity_store_info_price"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:maxLines="1"
+                        android:text="@string/activity_store_info_price"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                    <ImageView
+                        android:id="@+id/imageView4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="49"
+                        android:contentDescription="@string/activity_store_info_rating"
+                        android:src="@drawable/rating_4" />
+
+                    <TextView
+                        android:id="@+id/activity_store_info_feedback_clean"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+                    <TextView
+                        android:id="@+id/textView2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="49"
+                        android:textAppearance="?android:attr/textAppearanceSmall" />
+                </TableRow>
+            </TableLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/activity_store_info_function"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/sticky_height"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/activity_store_info_function_btn1"
+                style="?android:attr/buttonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/activity_store_info_function_btn2"
+                style="?android:attr/buttonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/activity_store_info_function_btn3"
+                style="?android:attr/buttonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</edu.utboy.biteit.utils.ObservableScrollView>

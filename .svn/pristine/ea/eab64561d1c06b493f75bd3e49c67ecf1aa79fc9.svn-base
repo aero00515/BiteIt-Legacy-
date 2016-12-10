@@ -1,0 +1,181 @@
+package edu.utboy.biteit;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.app.IntentService;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
+import android.os.SystemClock;
+import android.support.v4.app.NotificationCompat;
+
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+import edu.utboy.biteit.asynctasks.FriendsRequest;
+import edu.utboy.biteit.asynctasks.VolleyTaskManager;
+import edu.utboy.biteit.models.Friend;
+import edu.utboy.biteit.models.dao.FriendDAO;
+import edu.utboy.biteit.utils.AuthUser;
+
+public class GcmIntentService extends IntentService {
+
+	public static final int NOTIFICATION_ID = 1;
+	public static final String TAG = GcmIntentService.class.getSimpleName();
+	private NotificationManager mNotificationManager;
+	NotificationCompat.Builder builder;
+
+	public GcmIntentService() {
+		super("GcmIntentService");
+	}
+
+	@Override
+	protected void onHandleIntent(Intent intent) {
+		Bundle extras = intent.getExtras();
+		GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
+		// The getMessageType() intent parameter must be the intent you received
+		// in your BroadcastReceiver.
+		String messageType = gcm.getMessageType(intent);
+
+		if (!extras.isEmpty()) { // has effect of unparcelling Bundle
+			/*
+			 * Filter messages based on message type. Since it is likely that
+			 * GCM will be extended in the future with new message types, just
+			 * ignore any message types you're not interested in, or that you
+			 * don't recognize.
+			 */
+			if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR
+					.equals(messageType)) {
+				sendNotification("Send error: " + extras.toString());
+			} else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED
+					.equals(messageType)) {
+				sendNotification("Deleted messages on server: "
+						+ extras.toString());
+				// If it's a regular GCM message, do some work.
+			} else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE
+					.equals(messageType)) {
+				MyLog.i(GcmIntentService.class,
+						"GCM Get @ " + SystemClock.elapsedRealtime());
+
+				try {
+					JSONObject jsonFriend = new JSONObject(extras.getString(
+							"friend", ""));
+					MyLog.d(GcmIntentService.class, jsonFriend.toString());
+					long id = jsonFriend.getInt("id");
+					String username = jsonFriend.getString("username");
+					String name = jsonFriend.getString("first_name");
+					String email = jsonFriend.getString("email");
+					Friend friend = new Friend(id, username, name, "", email,
+							false, false);
+
+					Intent syncUserData = new Intent();
+					syncUserData.setAction(SyncUserDataService.SYNC_DATA);
+					syncUserData.setClass(getApplicationContext(),
+							SyncUserDataService.class);
+					syncUserData.putExtra("passby", extras);
+					startService(syncUserData);
+
+					FriendDAO friendDAO = new FriendDAO(GcmIntentService.this);
+					friendDAO.open();
+					friendDAO.save(friend);
+					friendDAO.close();
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+
+				// Post notification of received message.
+				sendNotification("Received: " + extras.toString());
+				MyLog.i(GcmIntentService.class,
+						"Received: " + extras.toString());
+			}
+		}
+		// Release the wake lock provided by the WakefulBroadcastReceiver.
+		GcmBroadcastReceiver.completeWakefulIntent(intent);
+	}
+
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(SyncUserDataService.ACTION_SYNC);
+		registerReceiver(br, filter);
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		if (br != null) {
+			unregisterReceiver(br);
+		}
+
+	}
+
+	private BroadcastReceiver br = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (intent.getAction().equals(SyncUserDataService.ACTION_SYNC)) {
+				try {
+					JSONObject jsonFriend = new JSONObject(intent
+							.getBundleExtra("passby").getString("friend", ""));
+					MyLog.d(GcmIntentService.class, jsonFriend.toString());
+					long id = jsonFriend.getInt("id");
+					VolleyTaskManager.getInstance().init(getAssets());
+					JSONObject requestBody = FriendsRequest.getInstance()
+							.createFriendJsonObject(AuthUser.getId(), id,
+									false, false);
+					FriendsRequest.getInstance().addFriend(
+							getApplicationContext(), requestBody,
+							new Response.Listener<JSONObject>() {
+
+								@Override
+								public void onResponse(JSONObject response) {
+									MyLog.i(GcmIntentService.class, ""
+											+ response.toString());
+								}
+							}, new Response.ErrorListener() {
+
+								@Override
+								public void onErrorResponse(VolleyError error) {
+									MyLog.e(GcmIntentService.class,
+											"" + error.toString());
+								}
+							});
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+
+			}
+		}
+	};
+
+	// Put the message into a notification and post it.
+	// This is just one simple example of what you might choose to do with
+	// a GCM message.
+	private void sendNotification(String msg) {
+		mNotificationManager = (NotificationManager) this
+				.getSystemService(Context.NOTIFICATION_SERVICE);
+
+		// TODO pendingIntent can auto addFriends
+		PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
+				new Intent(this, MainActivity.class), 0);
+
+		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(
+				this).setSmallIcon(R.drawable.ic_drawer)
+				.setContentTitle("GCM Notification")
+				.setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
+				.setContentText(msg);
+
+		mBuilder.setContentIntent(contentIntent);
+		mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+	}
+
+}

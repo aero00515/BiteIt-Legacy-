@@ -1,0 +1,22 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="edu.utboy.biteit.ui.StoreInfoActivity" >
+
+    <item
+        android:id="@+id/action_feedback"
+        android:icon="@drawable/abc_ic_search"
+        android:title="@string/action_feedback"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_focused"
+        android:icon="@drawable/abc_ic_ab_back_holo_dark"
+        android:title="@string/action_focused"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_blocked"
+        android:icon="@drawable/abc_ic_cab_done_holo_dark"
+        android:title="@string/action_blocked"
+        app:showAsAction="ifRoom"/>
+
+</menu>

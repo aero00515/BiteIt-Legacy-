@@ -1,0 +1,77 @@
+package edu.utboy.biteit.utils;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.os.Bundle;
+import edu.utboy.biteit.models.StoreInfo;
+
+public class JSONParse {
+
+	public static String nextPage = "";
+
+	public static List<StoreInfo> getStoreInfoByResponse(JSONObject json) {
+
+		List<StoreInfo> storeInfos = new ArrayList<StoreInfo>();
+
+		try {
+			int count = json.getInt("count");
+			nextPage = (json.has("next") && !json.isNull("next")) ? json
+					.getString("next") : null;
+			MyLog.d(JSONParse.class, "Count: " + count + "\nNext Page: "
+					+ nextPage);
+
+			JSONArray results = json.getJSONArray("results");
+
+			for (int i = 0; i < results.length(); i++) {
+				JSONObject storeObj = results.getJSONObject(i);
+				Bundle data = new Bundle();
+				data.putLong(StoreInfo.ID, 0);
+				data.putLong(StoreInfo.STORE_ID, storeObj.getLong("id"));
+				data.putString(StoreInfo.GOOGLE_STORE_ID,
+						storeObj.getString("google_store_id"));
+				data.putString(StoreInfo.NAME, storeObj.getString("name"));
+				data.putString(StoreInfo.ADDRESS, storeObj.getString("address"));
+				data.putString(StoreInfo.PHONE, storeObj.getString("phone"));
+				data.putDouble(StoreInfo.LONGITUDE,
+						storeObj.getDouble("longitude"));
+				data.putDouble(StoreInfo.LATITUDE,
+						storeObj.getDouble("latitude"));
+				data.putString(StoreInfo.FIRST_LEVEL,
+						storeObj.getString("first_level"));
+				data.putString(StoreInfo.THIRD_LEVEL,
+						storeObj.getString("third_level"));
+				data.putFloat(StoreInfo.RATING_CLEAN,
+						(float) storeObj.getDouble("ratingClean"));
+				data.putFloat(StoreInfo.RATING_SERVICE,
+						(float) storeObj.getDouble("ratingService"));
+				data.putFloat(StoreInfo.RATING_ATMOS,
+						(float) storeObj.getDouble("ratingAtmos"));
+				data.putFloat(StoreInfo.RATING_FLAVOR,
+						(float) storeObj.getDouble("ratingFlavor"));
+				data.putFloat(StoreInfo.RATING_UNKNOW,
+						(float) storeObj.getDouble("ratingUnknow"));
+				data.putBoolean(StoreInfo.IS_FAVOR,
+						storeObj.getBoolean("is_favor"));
+				data.putBoolean(StoreInfo.IS_BLOCKED,
+						storeObj.getBoolean("is_blocked"));
+				// data.putStringArray(StoreInfo.TAGS, (String[])
+				// ((storeObj.getString("tags")==null)?(new
+				// String[0]):(storeObj.getString("tags"))));
+
+				StoreInfo info = new StoreInfo(data);
+				storeInfos.add(info);
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		return storeInfos;
+	}
+}

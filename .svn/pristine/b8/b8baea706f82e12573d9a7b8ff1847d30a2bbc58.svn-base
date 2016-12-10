@@ -1,0 +1,54 @@
+package edu.utboy.biteit.utils;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
+import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+
+public class MapInfo {
+
+	public static String[] getAdminArea(double lat, double lng, Context ctx) {
+		String[] admins = new String[2];
+
+		Geocoder mLocation = new Geocoder(ctx, Locale.getDefault());
+
+		if (mLocation != null && Geocoder.isPresent()) {
+			try {
+				List<Address> components = mLocation.getFromLocation(lat, lng,
+						1);
+				if (!components.isEmpty() && components != null) {
+					admins[0] = components.get(0).getAdminArea();
+					admins[1] = components.get(0).getLocality();
+				} else {
+					admins[0] = "";
+					admins[1] = "";
+				}
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return admins;
+	}
+
+	public static String getRadius(double centerLat, double centerLng,
+			double nearLeftLat, double nearLeftLng) {
+		String radius;
+
+		Location centerLoc = new Location("");
+		centerLoc.setLatitude(centerLat);
+		centerLoc.setLongitude(centerLng);
+
+		Location nearleftLoc = new Location("");
+		nearleftLoc.setLatitude(nearLeftLat);
+		nearleftLoc.setLongitude(nearLeftLng);
+
+		radius = String.valueOf(centerLoc.distanceTo(nearleftLoc));
+
+		return radius;
+	}
+}

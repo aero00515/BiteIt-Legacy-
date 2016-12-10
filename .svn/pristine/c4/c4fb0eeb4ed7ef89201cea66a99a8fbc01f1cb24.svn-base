@@ -1,0 +1,192 @@
+package edu.utboy.biteit.ui.drawer;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
+
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+
+import edu.utboy.biteit.R;
+import edu.utboy.biteit.models.PhotoComment;
+import edu.utboy.biteit.models.StoreInfo;
+import edu.utboy.biteit.models.dao.PhotoCommentDAO;
+import edu.utboy.biteit.models.dao.StoreInfoDAO;
+import edu.utboy.biteit.ui.StoreInfoActivity;
+import edu.utboy.biteit.ui.adapters.StoreListAdapter;
+import edu.utboy.biteit.ui.adapters.StoreListAdapter.StoreLists;
+import edu.utboy.biteit.utils.BaseActivity;
+
+public class StoreListActivity extends BaseActivity {
+	private final static int CHANGE_PIC_TIME = 3000;
+	private StoreInfoDAO storeInfoDAO;
+	private PhotoCommentDAO photoCommentDAO;
+	private ListView storeList;
+	private StoreListAdapter storeListAdapter;
+	private List<StoreLists> storeLists;
+	private Handler picChangeHandler;
+	private boolean isLovedPage;
+	private int counter;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_store_list);
+		storeList = (ListView) findViewById(R.id.activity_store_listview);
+		counter = 0;
+		isLovedPage = true;
+		picChangeHandler = new Handler();
+		storeInfoDAO = new StoreInfoDAO(this);
+		photoCommentDAO = new PhotoCommentDAO(this);
+		storeInfoDAO.open();
+		photoCommentDAO.open();
+
+		ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(
+				this).build();
+		ImageLoader.getInstance().init(config);
+
+		// List<StoreInfo> storeinfos = storeInfoDAO.getAllStoreInfos();
+		List<StoreInfo> storeinfos = new ArrayList<StoreInfo>();
+		storeinfos.add(new StoreInfo(0L, "aa", "我的家", "aa", "2", 121, 23,
+				"台北市", "", 0, 0, 0, 0, 0, true, false, new String[] { "" }));
+		storeinfos.add(new StoreInfo(1L, "aa", "它的毛", "aa", "2", 121, 23,
+				"台北市", "", 0, 0, 0, 0, 0, true, false, new String[] { "" }));
+		storeinfos.add(new StoreInfo(2L, "aa", "你的狗", "aa", "2", 121, 23,
+				"台北市", "", 0, 0, 0, 0, 0, false, true, new String[] { "" }));
+		storeinfos.add(new StoreInfo(3L, "aa", "狗的毛", "aa", "2", 121, 23,
+				"台北市", "", 0, 0, 0, 0, 0, true, false, new String[] { "" }));
+		storeinfos.add(new StoreInfo(4L, "aa", "毛的你", "aa", "2", 121, 23,
+				"台北市", "", 0, 0, 0, 0, 0, false, true, new String[] { "" }));
+		storeinfos.add(new StoreInfo(5L, "aa", "你的我", "aa", "2", 121, 23,
+				"台北市", "", 0, 0, 0, 0, 0, true, false, new String[] { "" }));
+		storeLists = new ArrayList<StoreLists>();
+		storeListAdapter = new StoreListAdapter(this, storeLists);
+		storeList.setAdapter(storeListAdapter);
+		for (StoreInfo storeInfo : storeinfos) {
+			// List<PhotoComment> photoComments = photoCommentDAO
+			// .getStorePhotoComments(storeInfo.getStoreId());
+			List<PhotoComment> photoComments = new ArrayList<PhotoComment>();
+			photoComments
+					.add(new PhotoComment(
+							storeInfo.getStoreId(),
+							3,
+							Uri.parse("https://lh4.googleusercontent.com/-Dxy5NDJJF70/AAAAAAAAAAI/AAAAAAAAAAA/_zjxoUkbycs/photo.jpg"),
+							""));
+			photoComments
+					.add(new PhotoComment(
+							storeInfo.getStoreId(),
+							3,
+							Uri.parse("https://lh4.googleusercontent.com/-ve6veuKPOGw/AAAAAAAAAAI/AAAAAAAAAAA/bBRmbKi8Gq0/photo.jpg"),
+							""));
+			photoComments
+					.add(new PhotoComment(
+							storeInfo.getStoreId(),
+							3,
+							Uri.parse("https://lh3.googleusercontent.com/-Hc9k2hQotJU/AAAAAAAAAAI/AAAAAAAAAC8/TcpISdWmh-4/photo.jpg"),
+							""));
+			photoComments
+					.add(new PhotoComment(
+							storeInfo.getStoreId(),
+							3,
+							Uri.parse("https://lh4.googleusercontent.com/-LtWIymYfO30/AAAAAAAAAAI/AAAAAAAAADY/P4vrADvzXIs/photo.jpg"),
+							""));
+			photoComments
+					.add(new PhotoComment(
+							storeInfo.getStoreId(),
+							3,
+							Uri.parse("https://lh3.googleusercontent.com/-l5M8vGZ9ZKw/AAAAAAAAAAI/AAAAAAAABL0/-X4ah6eqGbE/photo.jpg"),
+							""));
+			storeLists.add(storeListAdapter.new StoreLists(storeInfo,
+					photoComments));
+
+		}
+		storeListAdapter.filter(true);
+		storeList.setOnItemClickListener(onItemClickListener);
+
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		picChangeHandler.postDelayed(runPics, CHANGE_PIC_TIME);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		picChangeHandler.removeCallbacks(runPics);
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		storeInfoDAO.close();
+		photoCommentDAO.close();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(final Menu menu) {
+		getMenuInflater().inflate(R.menu.friend_list, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(final MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.action_switch:
+			MyLog.d(StoreListActivity.class,
+					"clicked! before change isLoveNow:" + isLovedPage);
+			isLovedPage = !isLovedPage;
+			// if is love page, have to go to hate page
+			// if is hat page, have to go to love page
+			item.setIcon(isLovedPage ? R.drawable.switch_hate
+					: R.drawable.switch_love);
+			storeListAdapter.filter(isLovedPage);
+			MyLog.d(StoreListActivity.class, "after change! isLoveNow:"
+					+ isLovedPage);
+			return true;
+			// case R.id.menu_expandable_limit:
+			// mLimited = !mLimited;
+			// item.setChecked(mLimited);
+			// mExpandableListItemAdapter.setLimit(mLimited ? 2 : 0);
+			// return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	private Runnable runPics = new Runnable() {
+		@Override
+		public void run() {
+			counter++;
+			storeListAdapter.setPicPos(counter);
+			storeListAdapter.notifyDataSetChanged();
+			picChangeHandler.postDelayed(runPics, CHANGE_PIC_TIME);
+		}
+	};
+
+	private OnItemClickListener onItemClickListener = new OnItemClickListener() {
+
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position,
+				long id) {
+			long curId = storeLists.get(position).getStoreInfo().getStoreId();
+			Intent intent = new Intent();
+			intent.setClass(StoreListActivity.this, StoreInfoActivity.class);
+			intent.putExtra(StoreInfoActivity.STORE_ID_TAG, curId);
+			startActivity(intent);
+		}
+	};
+}

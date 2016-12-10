@@ -1,0 +1,156 @@
+package edu.utboy.biteit.models.dao;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import edu.utboy.biteit.db.DataBaseHelper;
+import edu.utboy.biteit.models.Friend;
+
+public class FriendDAO extends BaseDAO<Friend> {
+
+	public FriendDAO(Context ctx) {
+		super(ctx);
+	}
+
+	@Override
+	public void setAllColumns() {
+		columns = new String[] { DataBaseHelper._ID, DataBaseHelper.USERNAME,
+				DataBaseHelper.NAME, DataBaseHelper.URI, DataBaseHelper.EMAIL,
+				DataBaseHelper.IS_BLOCKED, DataBaseHelper.IS_FOCUSED };
+	}
+
+	/**
+	 * @return the row ID of the newly inserted row, or -1 if an error occurred
+	 */
+	@Override
+	public long save(Friend friend) {
+		ContentValues values = new ContentValues();
+		values.put(DataBaseHelper._ID, friend.getId());
+		values.put(DataBaseHelper.USERNAME, friend.getUsername());
+		values.put(DataBaseHelper.NAME, friend.getName());
+		values.put(DataBaseHelper.URI, friend.getPhoto());
+		values.put(DataBaseHelper.EMAIL, friend.getEmail());
+		values.put(DataBaseHelper.IS_BLOCKED, friend.isBlocked());
+		values.put(DataBaseHelper.IS_FOCUSED, friend.isFocued());
+		return database.insert(DataBaseHelper.TABLE_FRIENDS, null, values);
+	}
+
+	@Override
+	public List<Long> save(List<Friend> objects) {
+		List<Long> saveIds = new ArrayList<Long>(objects.size());
+		for (Friend friend : objects) {
+			ContentValues values = new ContentValues();
+			values.put(DataBaseHelper._ID, friend.getId());
+			values.put(DataBaseHelper.USERNAME, friend.getUsername());
+			values.put(DataBaseHelper.NAME, friend.getName());
+			values.put(DataBaseHelper.URI, friend.getPhoto());
+			values.put(DataBaseHelper.EMAIL, friend.getEmail());
+			values.put(DataBaseHelper.IS_BLOCKED, friend.isBlocked());
+			values.put(DataBaseHelper.IS_FOCUSED, friend.isFocued());
+			saveIds.add(database.insert(DataBaseHelper.TABLE_FRIENDS, null,
+					values));
+		}
+		return saveIds;
+	}
+
+	@Override
+	public void update(Friend friend) {
+		ContentValues values = new ContentValues();
+		values.put(DataBaseHelper.USERNAME, friend.getUsername());
+		values.put(DataBaseHelper.NAME, friend.getName());
+		values.put(DataBaseHelper.URI, friend.getPhoto());
+		values.put(DataBaseHelper.EMAIL, friend.getEmail());
+		values.put(DataBaseHelper.IS_BLOCKED, friend.isBlocked());
+		values.put(DataBaseHelper.IS_FOCUSED, friend.isFocued());
+
+		database.update(DataBaseHelper.TABLE_FRIENDS, values,
+				DataBaseHelper.USERNAME + "=?",
+				new String[] { String.valueOf(friend.getUsername()) });
+
+	}
+
+	@Override
+	public boolean delete(Friend friend) {
+		return database.delete(DataBaseHelper.TABLE_FRIENDS, DataBaseHelper._ID
+				+ "=?", new String[] { String.valueOf(friend.getId()) }) > 0;
+	}
+
+	@Override
+	public boolean delete(List<Friend> objects) {
+		boolean isDeleted = true;
+		for (Friend friend : objects) {
+			if (database.delete(DataBaseHelper.TABLE_FRIENDS,
+					DataBaseHelper._ID + "=?",
+					new String[] { String.valueOf(friend.getId()) }) == 0)
+				isDeleted = false;
+		}
+		return isDeleted;
+	}
+
+	@Override
+	public List<Friend> get() {
+		List<Friend> friends = new ArrayList<Friend>();
+
+		Cursor cursor = database.query(DataBaseHelper.TABLE_FRIENDS, columns,
+				null, null, null, null, null);
+
+		cursor.moveToFirst();
+		while (!cursor.isAfterLast()) {
+			Friend friend = cursorTo(cursor);
+			friends.add(friend);
+			cursor.moveToNext();
+		}
+		// make sure to close the cursor
+		cursor.close();
+		return friends;
+	}
+
+	@Override
+	public Friend get(long id) {
+		List<Friend> friends = new ArrayList<Friend>();
+
+		Cursor cursor = database.query(DataBaseHelper.TABLE_FRIENDS, columns,
+				DataBaseHelper._ID + "=?", new String[] { String.valueOf(id) },
+				null, null, null);
+
+		cursor.moveToFirst();
+		while (!cursor.isAfterLast()) {
+			Friend friend = cursorTo(cursor);
+			friends.add(friend);
+			cursor.moveToNext();
+		}
+		// make sure to close the cursor
+		cursor.close();
+		if (friends.size() == 0) {
+			MyLog.e(FriendDAO.class, "No this friend:" + id);
+			return null;
+		} else {
+			return friends.get(0);
+		}
+	}
+
+	@Override
+	protected Friend cursorTo(Cursor cursor) {
+		long id = cursor.getLong(cursor.getColumnIndex(DataBaseHelper._ID));
+		String username = cursor.getString(cursor
+				.getColumnIndex(DataBaseHelper.USERNAME));
+		String name = cursor.getString(cursor
+				.getColumnIndex(DataBaseHelper.NAME));
+		String uri = cursor
+				.getString(cursor.getColumnIndex(DataBaseHelper.URI));
+		String email = cursor.getString(cursor
+				.getColumnIndex(DataBaseHelper.EMAIL));
+		boolean isBlocked = cursor.getInt(cursor
+				.getColumnIndex(DataBaseHelper.IS_BLOCKED)) == 1 ? true : false;
+		boolean isFocused = cursor.getInt(cursor
+				.getColumnIndex(DataBaseHelper.IS_FOCUSED)) == 1 ? true : false;
+		Friend friend = new Friend(id, username, name, uri, email, isBlocked,
+				isFocused);
+		return friend;
+	}
+}

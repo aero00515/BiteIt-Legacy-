@@ -1,0 +1,72 @@
+package edu.utboy.biteit.ui;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.content.Intent;
+import android.os.Bundle;
+
+import com.origamilabs.library.views.StaggeredGridView;
+
+import edu.utboy.biteit.R;
+import edu.utboy.biteit.models.Friend;
+import edu.utboy.biteit.models.PhotoComment;
+import edu.utboy.biteit.models.dao.FriendDAO;
+import edu.utboy.biteit.models.dao.PhotoCommentDAO;
+import edu.utboy.biteit.ui.pages.FriendsInfoAdapter;
+import edu.utboy.biteit.ui.pages.FriendsInfoAdapter.FriendPhotoComment;
+import edu.utboy.biteit.utils.BaseActivity;
+
+public class FriendsInfoActivity extends BaseActivity {
+
+	private FriendDAO fDAO;
+	private PhotoCommentDAO photoCommentDAO;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_friends_info);
+		Intent data = getIntent();
+		int storeId = data.getIntExtra(StoreInfoActivity.STORE_ID_TAG, 0);
+
+		List<FriendPhotoComment> friendPhotoComments = new ArrayList<FriendPhotoComment>();
+		fDAO = new FriendDAO(this);
+		photoCommentDAO = new PhotoCommentDAO(this);
+
+		fDAO.open();
+		photoCommentDAO.open();
+		List<Friend> friends = fDAO.get();
+
+		StaggeredGridView gridView = (StaggeredGridView) findViewById(R.id.friends_info_staggered_gridview);
+		FriendsInfoAdapter adapter = new FriendsInfoAdapter(this,
+				friendPhotoComments);
+
+		for (Friend friend : friends) {
+			FriendPhotoComment friendPhotoComment = adapter.new FriendPhotoComment();
+			List<PhotoComment> photoComments = photoCommentDAO
+					.getStoreFriendsPhotoComments(storeId, friend.getId());
+			if (photoComments.size() > 0) {
+				friendPhotoComment.setFriend(friend);
+				friendPhotoComment.setPhotoComments(photoComments);
+				friendPhotoComments.add(friendPhotoComment);
+			}
+		}
+		if (friendPhotoComments.size() == 0) {
+			// TODO add empty view
+		}
+		int margin = getResources().getDimensionPixelSize(
+				R.dimen.activity_vertical_margin);
+		gridView.setItemMargin(margin);
+		gridView.setPadding(margin, 0, margin, 0);
+		gridView.setAdapter(adapter);
+		adapter.notifyDataSetChanged();
+	}
+
+	@Override
+	protected void onDestroy() {
+		fDAO.close();
+		photoCommentDAO.close();
+		super.onDestroy();
+	}
+
+}

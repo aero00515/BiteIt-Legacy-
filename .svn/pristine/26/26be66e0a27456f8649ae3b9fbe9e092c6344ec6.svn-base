@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/card_background_white" >
+
+    <Button
+        android:id="@+id/foundnewstore_store_not_exists_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="@string/foundnewstore_not_exists" />
+
+    <LinearLayout
+        android:id="@+id/foundnewstore_name_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/foundnewstore_store_not_exists_btn" >
+
+        <TextView
+            android:id="@+id/foundnewstore_text_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:text="@string/foundnewstore_name"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <EditText
+            android:id="@+id/foundnewstore_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:inputType="text" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/foundnewstore_address_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/foundnewstore_name_layout" >
+
+        <TextView
+            android:id="@+id/foundnewstore_text_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:text="@string/foundnewstore_address"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <EditText
+            android:id="@+id/foundnewstore_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:inputType="textPostalAddress" >
+        </EditText>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/foundnewstore_phone_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/foundnewstore_address_layout" >
+
+        <TextView
+            android:id="@+id/foundnewstore_text_tel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:text="@string/foundnewstore_tel"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <EditText
+            android:id="@+id/foundnewstore_tel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:inputType="phone" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/foundnewstore_photos_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/foundnewstore_store_apply"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/foundnewstore_phone_layout" >
+
+        <ImageButton
+            android:id="@+id/foundnewstore_addphoto_btn"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/activity_store_info_feedback_photo_description"
+            android:scaleType="centerInside"
+            android:src="@drawable/take_pictue" />
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/foundnewstore_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+        </android.support.v4.view.ViewPager>
+    </LinearLayout>
+
+    <!-- TODO need to have the dp size for warning icon -->
+
+    <ImageView
+        android:id="@+id/foundnewstore_name_change_warning_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/foundnewstore_name_layout"
+        android:layout_alignStart="@+id/foundnewstore_name_layout"
+        android:layout_alignTop="@+id/foundnewstore_name_layout"
+        android:background="#ddFFf000"
+        android:contentDescription="@string/activity_store_info_feedback_photo_description"
+        android:src="@drawable/abc_ic_go_search_api_holo_light"
+        android:visibility="invisible" />
+    <!-- TODO need to have the dp size for warning icon -->
+
+    <ImageView
+        android:id="@+id/foundnewstore_address_change_warning_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/foundnewstore_address_layout"
+        android:layout_alignStart="@+id/foundnewstore_address_layout"
+        android:layout_alignTop="@+id/foundnewstore_address_layout"
+        android:background="#ddFFf000"
+        android:contentDescription="@string/activity_store_info_feedback_photo_description"
+        android:src="@drawable/abc_ic_go_search_api_holo_light"
+        android:visibility="invisible" />
+    <!-- TODO need to have the dp size for warning icon -->
+
+    <ImageView
+        android:id="@+id/foundnewstore_phone_change_warning_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/foundnewstore_phone_layout"
+        android:layout_alignStart="@+id/foundnewstore_phone_layout"
+        android:layout_alignTop="@+id/foundnewstore_phone_layout"
+        android:background="#ddFFF000"
+        android:contentDescription="@string/activity_store_info_feedback_photo_description"
+        android:src="@drawable/abc_ic_go_search_api_holo_light"
+        android:visibility="invisible" />
+    <!-- TODO need to have the dp size for warning icon -->
+
+    <Button
+        android:id="@+id/foundnewstore_store_apply"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="@string/foundnewstore_apply" />
+
+    <TextView
+        android:id="@+id/foundnewstore_check_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/foundnewstore_store_apply"
+        android:layout_centerHorizontal="true"
+        android:text="@string/foundnewstore_check_for_report_hint"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+</RelativeLayout>

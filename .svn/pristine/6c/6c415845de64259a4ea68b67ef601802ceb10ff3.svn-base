@@ -1,0 +1,220 @@
+package edu.utboy.biteit.ui.pages;
+
+import idv.andylin.tw.andyandroidlibs.utils.MyLog;
+
+import java.util.List;
+
+import android.graphics.Bitmap;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.assist.ImageSize;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
+
+import edu.utboy.biteit.R;
+import edu.utboy.biteit.asynctasks.VolleyTaskManager;
+import edu.utboy.biteit.models.Friend;
+import edu.utboy.biteit.models.PhotoComment;
+import edu.utboy.biteit.ui.FriendsInfoActivity;
+
+public class FriendsInfoAdapter extends BaseAdapter {
+
+	private FriendsInfoActivity activity;
+	private List<FriendPhotoComment> friendPhotoComments;
+	private DisplayImageOptions mDisplayImageOptions;
+	private ImageSize imageSize;
+
+	public FriendsInfoAdapter(FriendsInfoActivity activity,
+			List<FriendPhotoComment> friendPhotoComments) {
+		this.activity = activity;
+		this.friendPhotoComments = friendPhotoComments;
+		mDisplayImageOptions = new DisplayImageOptions.Builder()
+				.showImageForEmptyUri(R.drawable.ic_launcher)
+				.showImageOnFail(R.drawable.ic_launcher)
+				.showImageOnLoading(R.drawable.ic_launcher).cacheInMemory(true)
+				.cacheOnDisk(true).build();
+		imageSize = new ImageSize((int) activity.getResources().getDimension(
+				R.dimen.store_info_pic_min_height), (int) activity
+				.getResources().getDimension(R.dimen.store_info_pic_min_height));
+	}
+
+	@Override
+	public int getCount() {
+		return friendPhotoComments.size();
+	}
+
+	@Override
+	public Object getItem(int position) {
+		return friendPhotoComments.get(position);
+	}
+
+	@Override
+	public long getItemId(int position) {
+		return friendPhotoComments.get(position).getFriend().getId();
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		if (convertView == null) {
+			convertView = activity.getLayoutInflater().inflate(
+					R.layout.fragment_friends_info, parent, false);
+			FriendPhotoComment friendPhotoComment = (FriendPhotoComment) getItem(position);
+			Friend friend = friendPhotoComment.getFriend();
+			final List<PhotoComment> photoComments = friendPhotoComment
+					.getPhotoComments();
+			final TextView friendComment = (TextView) convertView
+					.findViewById(R.id.fragment_friends_info_comment);
+			ImageView friendPhoto = (ImageView) convertView
+					.findViewById(R.id.fragment_friends_info_profile_pic);
+			TextView friendName = (TextView) convertView
+					.findViewById(R.id.fragment_friends_info_name);
+
+			ImageLoader.getInstance().displayImage(friend.getPhoto(),
+					friendPhoto);
+			ViewPager photoCommentViewpager = (ViewPager) convertView
+					.findViewById(R.id.fragment_friends_info_pic_pager);
+
+			FriendPhotoCommentAdapter mFriendPhotoCommentAdapter = new FriendPhotoCommentAdapter(
+					photoComments);
+			if (photoComments.size() > 0) {
+				friendComment.setText(photoComments.get(0).getComment());
+			}
+			friendName.setText(friend.getName());
+			photoCommentViewpager.setAdapter(mFriendPhotoCommentAdapter);
+			photoCommentViewpager
+					.setOnPageChangeListener(new OnPageChangeListener() {
+
+						@Override
+						public void onPageSelected(int arg0) {
+							MyLog.d(FriendsInfoAdapter.class, "onPageSelected "
+									+ arg0);
+							friendComment.setText(photoComments.get(arg0)
+									.getComment());
+						}
+
+						@Override
+						public void onPageScrolled(int arg0, float arg1,
+								int arg2) {
+							MyLog.d(FriendsInfoAdapter.class, "onPageScrolled "
+									+ arg0 + " " + arg1 + " " + arg2);
+						}
+
+						@Override
+						public void onPageScrollStateChanged(int arg0) {
+							MyLog.d(FriendsInfoAdapter.class,
+									"onPageScrollStateChanged " + arg0);
+						}
+					});
+		}
+		return convertView;
+	}
+
+	public class FriendPhotoComment {
+		private List<PhotoComment> photoComments;
+		private Friend friend;
+
+		public Friend getFriend() {
+			return friend;
+		}
+
+		public void setFriend(Friend friend) {
+			this.friend = friend;
+		}
+
+		public List<PhotoComment> getPhotoComments() {
+			return photoComments;
+		}
+
+		public void setPhotoComments(List<PhotoComment> photoComments) {
+			this.photoComments = photoComments;
+		}
+	}
+
+	private class FriendPhotoCommentAdapter extends PagerAdapter {
+
+		/**
+		 * This view only has one TextView which follows the current photo.
+		 */
+		private List<PhotoComment> photoComments;
+
+		public FriendPhotoCommentAdapter(List<PhotoComment> photoComments) {
+			FriendPhotoCommentAdapter.this.photoComments = photoComments;
+		}
+
+		@Override
+		public Object instantiateItem(ViewGroup container, int position) {
+			PhotoComment photoComment = photoComments.get(position);
+			final ImageView imageView = new ImageView(
+					activity.getApplicationContext());
+			imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+			imageView.setBackgroundColor(activity.getResources().getColor(
+					android.R.color.holo_red_dark));
+			int padding = activity.getResources().getDimensionPixelSize(
+					R.dimen.activity_horizontal_padding);
+			imageView.setPadding(padding, 0, padding, 0);
+			imageView.setLayoutParams(new LayoutParams(
+					LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+			ImageLoader.getInstance().loadImage(
+					VolleyTaskManager.getInstance().getMediaRoot()
+							+ photoComment.getUri(), imageSize,
+					mDisplayImageOptions, new ImageLoadingListener() {
+
+						@Override
+						public void onLoadingStarted(String imageUri, View view) {
+						}
+
+						@Override
+						public void onLoadingFailed(String imageUri, View view,
+								FailReason failReason) {
+						}
+
+						@Override
+						public void onLoadingComplete(String imageUri,
+								View view, Bitmap loadedImage) {
+							imageView.setImageBitmap(loadedImage);
+						}
+
+						@Override
+						public void onLoadingCancelled(String imageUri,
+								View view) {
+						}
+					});
+			container.addView(imageView);
+			return imageView;
+		}
+
+		@Override
+		public void destroyItem(ViewGroup container, int position, Object object) {
+			container.removeView((ImageView) object);
+		}
+
+		@Override
+		public int getCount() {
+			return photoComments.size();
+		}
+
+		@Override
+		public float getPageWidth(int position) {
+			if (photoComments.size() > 1) {
+				return 0.85f;
+			}
+			return 1f;
+		}
+
+		@Override
+		public boolean isViewFromObject(View arg0, Object arg1) {
+			return arg0 == arg1;
+		}
+
+	}
+}

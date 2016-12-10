@@ -1,0 +1,32 @@
+package edu.utboy.biteit.ui;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ImageView;
+import edu.utboy.biteit.R;
+
+public class StoreInfoFeedbackActivity extends Activity {
+
+	private ImageView closeImageView;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_store_info_feedback);
+		closeImageView = (ImageView) findViewById(R.id.activity_store_info_feedback_close);
+		closeImageView.setOnClickListener(cancelListener);
+	}
+
+	private OnClickListener cancelListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			setResult(RESULT_CANCELED);
+			finish();
+			overridePendingTransition(R.anim.abc_fade_in, R.anim.abc_fade_out);
+		}
+	};
+
+}
